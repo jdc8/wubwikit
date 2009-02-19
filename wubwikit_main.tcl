@@ -9,6 +9,29 @@ proc help { } {
 
 Usage: tclkit wubwikit<version>.kit <options>
 
+Typical usage:
+
+- Create a new wiki database:
+
+    % tclkit wubwikit.kit mkdb mywiki title "My Wiki!"
+
+  This will create 2 files:
+
+      mywiki.tkd      A new wiki database
+      mywiki.toc      A new wiki table of contents
+
+- Start the wiki as Web application:
+
+    % tclkit wubwikit.kit wub 1 wikidb mywiki.tkd toc file:mywiki.toc welcomezero 1
+
+- Start the wiki as Tk application:
+
+    % tclkit wubwikit.kit wub 0 wikidb mywiki.tkd toc file:mywiki.toc welcomezero 1
+
+- Start the wiki with a copy of the Tcler's wiki database as Web application:
+
+    % tclkit wubwikit.kit wub 1 wikidb wikit.tkd
+
 Basic options:
  
   help                                  
@@ -49,7 +72,11 @@ Options in Wub mode:
 
   image <file>                          
 
-    Specify name of image to be added to the wiki
+    Specify name of image to be added to the wiki. Special image names used in
+    the wiki:
+
+        favicon.ico      The favicon
+        plume.png        The plume shown top-right, with background color #CCC
 
   logfile <file>                        
 
@@ -63,9 +90,9 @@ Options in Wub mode:
 
     Specify html file to be used as welcome page
 
-  welcomeone <boolean>
+  welcomezero <boolean>
 
-    When set to true, page 1 from the database will be used as welcome
+    When set to true, page 0 from the database will be used as welcome
     page. When set to false, the file 'welcome.html' will be used as welcome
     page.
 
@@ -112,7 +139,7 @@ Options in Tk mode:
 }
 }
 
-proc mkdb { fnm } { 
+proc mkdb { fnm title } { 
 
     if {[file exists $fnm.tkd]} {
 	error "Database '$fnm.tkd' already exists"
@@ -143,15 +170,15 @@ proc mkdb { fnm } {
 
     # Page 0
     mk::row append $db.pages \
-	name "Page 0" \
-	page "Not used." \
+	name $title \
+	page "Your wiki starts here!" \
 	date [clock seconds] \
 	who init
 
     # Page 1
     mk::row append $db.pages \
-	name "Your wiki start page" \
-	page "Your wiki starts here!" \
+	name "Page 1" \
+	page "Not used." \
 	date [clock seconds] \
 	who init
 
@@ -192,7 +219,7 @@ proc mkdb { fnm } {
     set f [open $fnm.toc w]
     close $f
 
-    puts "Start wubwikit with these options:\n\n    wub <boolean> wikidb $fnm.tkd toc file:$fnm.toc welcomeone 1\n"
+    puts "Start wubwikit with these options:\n\n    wub <boolean> wikidb $fnm.tkd toc file:$fnm.toc welcomezero 1\n"
 }
 
 
@@ -215,9 +242,11 @@ if {[info exists ::env(TEMP)]} {
     set logfile /tmp/wikit.log
 }
 set welcome_file ""
-set welcomeone 0
+set welcomezero 0
 set image_files {}
 set ttitle "Welcome to the Tclers Wiki starkit!"
+set mkdb 0
+set dbfilename ""
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -249,8 +278,8 @@ foreach {key val} $iargv {
 	welcome {
 	    set welcome_file [file normalize $val]
 	}
-	welcomeone {
-	    set welcomeone $val
+	welcomezero {
+	    set welcomezero $val
 	}
 	image {
 	    lappend image_files [file normalize $val]
@@ -263,13 +292,18 @@ foreach {key val} $iargv {
 	    exit
 	}
 	mkdb {
-	    mkdb $val
+	    set mkdb 1
+	    set dbfilename $val
 	    exit
 	}
 	default {
 	    lappend argv $key $val
 	}
     }
+}
+
+if {$mkdb} {
+    mkdb $dbfilename $ttitle
 }
 
 if {![info exists twikidb]} {
@@ -364,7 +398,7 @@ base=
     close $f
 
     set ::starkit_wikittitle $ttitle
-    set ::starkit_welcomeone $welcomeone
+    set ::starkit_welcomezero $welcomezero
 
     if {[info exists twikidb]} {
         set ::starkit_wikitdbpath $twikidb
