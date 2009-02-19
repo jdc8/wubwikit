@@ -13,7 +13,7 @@ Typical usage:
 
 - Create a new wiki database:
 
-    % tclkit wubwikit.kit mkdb mywiki title "My Wiki!"
+    % tclkit wubwikit.kit mkdb mywiki title "My Wiki"
 
   This will create 2 files:
 
@@ -26,7 +26,7 @@ Typical usage:
 
 - Start the wiki as Tk application:
 
-    % tclkit wubwikit.kit wub 0 wikidb mywiki.tkd toc file:mywiki.toc welcomezero 1
+    % tclkit wubwikit.kit wub 0 wikidb mywiki.tkd toc file:mywiki.toc
 
 - Start the wiki with a copy of the Tcler's wiki database as Web application:
 
@@ -294,7 +294,6 @@ foreach {key val} $iargv {
 	mkdb {
 	    set mkdb 1
 	    set dbfilename $val
-	    exit
 	}
 	default {
 	    lappend argv $key $val
@@ -304,6 +303,7 @@ foreach {key val} $iargv {
 
 if {$mkdb} {
     mkdb $dbfilename $ttitle
+    exit
 }
 
 if {![info exists twikidb]} {
