@@ -7,12 +7,67 @@ proc help { } {
 
 Usage: tclkit wubwikit.kit <options>
 
-Options:
+Basic options:
+ 
+  help                                  
+
+    Show this message
+
+  port <port>                           
+
+    Set port used by [Wub]
+
+  wikidb <path>                         
+
+    Set path to wiki database. Mandatory!
+
+  wub <boolean>                         
+
+    Run as [Wub] based web-server if true, run as [Tk] application if false (default).
+
+Options to set Table Of Contents (TOC):
+
+  toc file:<path>                       
+
+    Use the contents of the specified file as table of contents in [Wub]
+    mode. Copy contents of the specified file to page 8 of the specified wiki
+    database to use it as table of contents in [Tk] mode.
+
+  toc wub                               
+
+    Copy table of contents as found in the starkit to page 8 of the specified
+    wiki database to use it as table of contents in [Tk] mode.
+
+Options in Wub mode:
 
   cmdport <port>                        
 
     Set command port used by [Wub], you can `telnet` to this port to interface
     with the webserver.
+
+  image <file>                          
+
+    Specify name of image to be added to the wiki
+
+  logfile <file>                        
+
+    Set name of log file
+
+  title <text>                          
+
+    Set title to be used on welcome page when the welcome page is base on welcome.html
+
+  welcome <file>                        
+
+    Specify html file to be used as welcome page
+
+  welcomeone <boolean>
+
+    When set to true, page 1 from the database will be used as welcome
+    page. When set to false, the file 'welcome.html' will be used as welcome
+    page.
+
+Options in Tk mode:
 
   font_buttonsize <size>                
 
@@ -52,55 +107,6 @@ Options:
 
     Set size of sub-sub-title font. Default is `14`. The sub-sub-title font is
     also made italic.
- 
-  help                                  
-
-    Show this message
-
-  image <file>                          
-
-    Specify name of image to be added to the wiki
-
-  logfile <file>                        
-
-    Set name of log file
-
-  port <port>                           
-
-    Set port used by [Wub]
-
-  title <text>                          
-
-    Set title to be used on welcome page
-
-  toc file:<path>                       
-
-    Use the contents of the specified file as table of contents in [Wub]
-    mode. Copy contents of the specified file to page 8 of the specified wiki
-    database to use it as table of contents in [Tk] mode.
-
-  toc wub                               
-
-    Copy table of contents as found in the starkit to page 8 of the specified
-    wiki database to use it as table of contents in [Tk] mode.
-
-  wikidb <path>                         
-
-    Set path to wiki database. Mandatory!
-
-  welcome <file>                        
-
-    Specify html file to be used as welcome page
-
-  welcomeone <boolean>
-
-    When set to true, page 1 from the database will be used as welcome
-    page. When set to false, the file 'welcome.html' will be used as welcome
-    page.
-
-  wub <boolean>                         
-
-    Run as [Wub] based web-server if true, run as [Tk] application if false (default).
 }
 }
 
