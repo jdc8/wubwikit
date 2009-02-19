@@ -205,7 +205,13 @@ set globalroot 0
 set home [pwd]
 set port 8080
 set cmdport 8082
-set logfile /tmp/wikit.log
+if {[info exists ::env(TEMP)]} {
+    set logfile [file join $::env(TEMP) wikit.log]
+} elseif {[info exists ::env(TMP)]} {
+    set logfile [file join $::env(TMP) wikit.log]
+} else {
+    set logfile /tmp/wikit.log
+}
 set welcome_file ""
 set welcomeone 0
 set image_files {}
