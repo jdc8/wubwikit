@@ -5,7 +5,7 @@ starkit::startup
 proc help { } {
     puts {
 
-Usage: tclkit wubwikit.kit <options>
+Usage: tclkit wubwikit<version>.kit <options>
 
 Basic options:
  
