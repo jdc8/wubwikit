@@ -1,4 +1,6 @@
 
+catch {console show}
+
 package require starkit
 starkit::startup
 
