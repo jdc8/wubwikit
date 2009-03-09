@@ -265,6 +265,15 @@ foreach {key val} $iargv {
 	    set uTOC [read $f]
 	    close $f
 	}
+	edit_template { 
+	    if { [string match "file:*" $val] } {
+		set fnm [string range $val 5 end]
+		set f [open $fnm r]
+		set val [read $f]
+		close $f
+	    }
+	    set ::starkit_edit_template $val
+	}
 	wikidb {
 	    set val [file normalize $val]
 	    lappend argv $key $val
