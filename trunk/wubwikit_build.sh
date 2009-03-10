@@ -66,5 +66,11 @@ cp wikitoc.jpg wubwikit.vfs/lib/wikitcl/wubwikit/docroot/images
 
 # Create starkit
 sdx wrap wubwikit.kit -writable
-mkdir -p builds
 mv wubwikit.kit builds/wubwikit`date +%Y%m%d`.kit
+
+# Create zip
+mv wubwikit.vfs wubwikit`date +%Y%m%d`.vfs
+zip -r wubwikit`date +%Y%m%d`.vfs.zip wubwikit`date +%Y%m%d`.vfs
+mkdir -p builds
+mv wubwikit`date +%Y%m%d`.vfs.zip builds
+mv wubwikit`date +%Y%m%d`.vfs wubwikit.vfs
