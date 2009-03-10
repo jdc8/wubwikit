@@ -1,13 +1,20 @@
 
 catch {console show}
 
-package require starkit
-starkit::startup
+if {![catch {package require starkit}]} {
+    starkit::startup
+}
 
 proc help { } {
     puts {
 
-Usage: tclkit wubwikit<version>.kit <options>
+Usage as starkit:
+
+    % tclkit wubwikit<version>.kit <options>
+
+Usage as unwrapped starkit or unzippped archive:
+
+    % tclkit wubwikit<version>.vfs/main.tcl <options>
 
 Typical usage:
 
@@ -49,6 +56,11 @@ Basic options:
   wub <boolean>                         
 
     Run as [Wub] based web-server if true, run as [Tk] application if false (default).
+
+  edit_template file:<path>
+  edit_template <text>
+
+    Set text to be used when editing a page for the first time.    
 
 Options to set Table Of Contents (TOC):
 
