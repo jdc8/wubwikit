@@ -3,6 +3,10 @@ catch {console show}
 
 if {![catch {package require starkit}]} {
     starkit::startup
+} else {
+    namespace eval ::starkit {
+	variable topdir [file dirname [file normalize [info script]]]
+    }
 }
 
 proc help { } {
@@ -14,7 +18,16 @@ Usage as starkit:
 
 Usage as unwrapped starkit or unzippped archive:
 
-    % tclkit wubwikit<version>.vfs/main.tcl <options>
+    % tclsh wubwikit<version>.vfs/main.tcl <options>
+
+Requirements:
+
+    - tclkit based on Tcl/Tk 8.6
+
+  or
+
+    - tclsh based on Tcl/Tk 8.6 
+    - package Mk4tcl
 
 Typical usage:
 
