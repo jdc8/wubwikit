@@ -98,6 +98,10 @@ Options in Wub mode:
 
     Set title to be used on welcome page when the welcome page is base on welcome.html
 
+  url <text>
+
+    Set url of the website (specify without leading http://)
+
   welcome <file>                        
 
     Specify html file to be used as welcome page
@@ -259,6 +263,7 @@ set image_files {}
 set ttitle "Welcome to the Tclers Wiki starkit!"
 set mkdb 0
 set dbfilename ""
+set url ""
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -420,6 +425,9 @@ base=
 
     set ::starkit_wikittitle $ttitle
     set ::starkit_welcomezero $welcomezero
+    if {[string length $url]} {
+        set ::starkit_url $url
+    }
 
     if {[info exists twikidb]} {
         set ::starkit_wikitdbpath $twikidb
