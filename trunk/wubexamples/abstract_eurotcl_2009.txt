@@ -1,0 +1,87 @@
+Name * : Decoster
+
+Firstname *: Jos
+
+Your Email-address * : jos.decoster@gmail.com
+
+Organization/Institution * : I work for 'Target Compiler Technologies' but 'Wub'
+and 'wikitcl' are things I do for a hobby.
+
+Country : Belgium
+
+Abstract category : tutorial
+
+Title * : Let's Wub
+	 
+Keywords : Wub Tcl 'Web application framework'
+
+Abstract text * :
+
+Since the 'Great Wiki Meltdown' in the spring of 2007, the Tcler's Wiki has been
+running on Wub. Written by Colin McCormack, Wub is a pure Tcl Http 1.1
+webserver, a successor of TclHttpd. It makes heavy use of bleeding edgd Tcl
+(8.6) features such as dicts, co-routines, zlib and TclOO. Wub comes with a lot
+of what it calls 'Domains': pluggable building blocks adding new functionality.
+
+This talk will not focus on the inner workings of Wub, but will take a
+step-by-step approach on runnig Wub and using its domains to make Web
+applications.
+
+Topics covered:
+
+- Getting Wub
+
+- Runtime requirements
+
+- Running Wub out-of-the-box
+
+- Configuring your web application with 'Nubs': domain, rewrite, redirect
+
+- Using the 'File' domain
+
+- Templating with the 'Mason' domain
+
+- Mapping URL's to Tcl commands using the 'Direct' domain
+
+- The Wub API
+
+- Adding 'JQuery' to your Web application with the 'jQ' domain
+
+- Init parameters
+
+- More 'Nubs' (block, literal, code) and interactive introspection
+
+- Using the 'Convert' domain for content transformation
+
+- Advanced Domains:
+
+    - Tub: a generic repository for form values
+
+    - Tie: web interface on namespaces
+
+    - Coco: mapping co-routines to URL's
+
+    - Honeypot: catch bad spiders
+
+    - Repo: a file repository
+
+    - stx: a wiki-inspired format to specify html documents
+
+    - Icons : a set of icons
+
+    - Session: session management
+
+    - CGI, Rest, Sinorca, Simplicio
+
+- Utilities:
+
+    - Cookies
+
+    - Report
+
+    - Query
+
+    - Introspection
+
+
+

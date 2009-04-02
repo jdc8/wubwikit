@@ -1,0 +1,352 @@
+ex1: default Wub server, no ini, no nub.
+
+     - uses ./docroot/html    for static contents
+                      scripts
+                      images
+                      css
+
+ex2: File domain
+
+     - add some nub to make 'static' site
+
+     - rewrite for html files
+
+     - redirection of /
+
+     - use of 'index.html' when browsing directories
+
+     - use 'nodir' to prevent browsing
+
+     - use File domain to map in other directory
+
+     - set expire 
+
+     - explain options: root, index, hide, redirdir expires, dateformat, nodir
+
+ex3: Mason domain
+
+     - template files (.tml), result of [subst <contents of template>] is
+       returned (mason)
+
+     - .wrapper, .notfound, .auth in mason2
+
+     - Main idea: provide a .tml, depending on the request (.html, .txt, ...)
+       the contents is returned in another format.
+
+     - return values:
+
+         - template files: return the contents or set response dict -content
+
+         - .auth : set response dict -code to 200 if access is allowed, other
+	           value (403) if denied. If denied, return and error message or
+	           set response dict -content and return ""
+  
+         - .wrapper : return the updated response dict (-content) of return the
+           content (you'll need to unset response dict -content)
+
+         - .notfound : return the contents or set response dict -content
+
+     - set content-type in the response dict to prevent conversion (default is
+       x-text/html-fragment) 
+
+     - explain options: root, hide, functional, notfound, wrapper, auth,
+       indexfile (if indexfile has $functional as extention it is also subst)
+
+     - queries
+
+[13:37]	colin	Well, I was going to use it to build a wiki-like site.
+[13:37]	colin	The idea of Mason is:  you pepper special templates through the fs, and they get interpreted at key points.
+[13:37]	colin	One is .notfound, which is interpreted instead of a 404
+[13:38]	colin	one is .auth, which checks authorisation by whatever means desired
+[13:38]	colin	One is ummm ,wrapper, which is interpreted whenever a file *is* found
+[13:38]	colin	Each of them gets the request, and can edit it before passing it back.
+[13:39]	colin	So, .auth checks to see if you can get something, and can mod the request.
+[13:39]	colin	.wrapper munges the result
+[13:39]	colin	and .notfound is for when there isn't anything.
+[13:39]	colin	Now, one more trick:  If there's no .auth, .wrapper or .notfound in a directory, Mason will search the parent directories until it finds one.
+[13:40]	colin	And that's about it 
+[13:40]	jdc_	ok, gonna play with it.
+[13:40]	colin	Each of those template files is a pure tcl script.
+[13:40]	colin	Oh, one more thing ... files ending in .tml (by default) are also templates.
+[13:40]	colin	So when they're fetched, they're evaluated and the result is the result of the call
+[13:41]	colin	You can see some examples in the default docroot, I play around with it a bit.
+[13:41]	colin	I've made the mods, the jQ // problem should disappear now.
+[13:42]	colin	hope I haven't introduced more 
+[13:46]	jdc_	when making a .tml, it's limited to [subst] on what you can write?
+[13:46]	colin	Yes, it's all done in [subst], but how is that limiting?
+[13:47]	jdc_	no loops?
+[13:47]	colin	Oh, you can certainly loop in [subst]
+[13:47]	colin	[subst { [while 0 {puts woo}]}]
+[13:48]	colin	And if you look in Html.tcl you'll see a whole bunch of subst-enabled looping commands
+[13:48]	colin	If While Foreach Switch
+[13:49]	jdc_	oeps. limited kowledge of subst 
+[13:49]	colin	Subst is wonderful!
+[13:49]	colin	Remember, too, you can do [something; something]
+[13:49]	colin	And I *think* [something;] which returns ""
+[13:50]	colin	Otherwise, [set "" ""] will return a space
+[13:50]	colin	if returns the value of the script it evaluates, btw
+[13:50]	colin	% puts [if 1 {set x 2}]
+		2
+		% puts [if 0 {set x 2}]
+		
+		%
+[13:51]	colin	There are some sophisticated tricks you can do in Mason templates too ... onesec while I refresh my memory
+[13:53]	colin	Ah yes, now I remember 
+[13:53]	   * jdc_ still looking at the basics, never used subst before
+[13:53]	colin	Ok, if it's just a normal kind of subst, whatever it evaluates to becomes the result.
+[13:54]	colin	But: you also have access to the $response variable.
+[13:54]	colin	it's a dict, the response being built up.
+[13:54]	colin	And if you [dict set response -content] to something, then *that* is the result of your evaluation
+[13:55]	jdc_	and if you need access to a database or so you open it before stating the server?
+[13:55]	colin	Yeah, that'd be the way.  That's what I do.
+[13:56]	colin	Oh, btw, since you have access to $response, you can do things like Query fetching.
+[13:58]	colin	Yeah, now the q is whether the query has already been decoded.
+[13:58]	colin	It hasn't, not unless the rest of the server has done it first.
+[13:59]	colin	set query [Query parse $req]
+			dict set req -Query $query
+
+ex4: Direct domain: basics and Html commands
+
+     - namespace domain with/without query args and a default proc
+     - TclOO object domain with/without query args and a default proc
+         - make sure to export the /methods!!!!!
+     - set content, content-type and title, (header, scripts, style, ...),
+       sending text/plain (other content type e.g. images)
+     - return the request with content/content-type
+     - armouring!!!!!
+     - Wub API:
+         - html commands + 'subst' control commands
+
+	     <html_tag> ?<key> <value> ...? content
+
+	     Examples of:
+
+	       In body:
+
+	         <h1> (but also <h2>, <h3>, ...)
+		 <p>, <span>, <span>?, <div>, divs
+		 <br>, <hr>
+		 <b>, <i>, <tt>
+		 <ul>, <ol> (but also <li>)
+		 <table>, <tr>, <td> (but also <thead>, <tfoot>, <tbody>, ...)
+		 <img>
+		 <a>
+
+		 Html dict2table
+		 Html script
+		 Html style
+		 Html menulist
+
+               In header
+		 
+		 <author>
+		 <description>
+		 <copyright>
+		 <generator>
+		 <keywords>
+		 <meta>
+		 <link>
+		 <stylesheet>
+
+               Without conversions:
+
+	         <html>
+	         <body>
+		 <head>		 
+
+	       subst powered commands:		 
+
+		 Foreach (but also If, While)
+
+ex5: Direct domain: Http commands
+
+	     Http Redir
+	     Http Redirect
+	     Http Found (equiv to Redirect)
+	     Http Notfound
+	     Http Forbidden
+	     Http Referer
+	     Http RedirectReferer
+	     Http Relocated
+	     Http SeeOther
+	     Http Moved
+
+	     Http Suspend/Resume -> later
+
+	     Http File           -> better via File/Mason
+	     Http CacheableFile  -> better via File/Mason
+	     Http Depends
+	     Http NoCache
+	     Http Cache
+	     Http DCache
+	     Http setCtype
+	     Http CacheableContent
+	     Http OkResponse
+	     Http Ok
+	     Http Ok+
+	     Http Pass
+	     Http Create
+	     Http Accepted
+	     Http NonAuthoritative
+	     Http NoContent
+	     Http ResetContent
+	     Http PartialContent
+	     Http NotImplemented
+	     Http Unavailable
+	     Http GatewayTimeout
+	     Http Bad
+	     Http Unauthorized
+	     Http Conflict
+	     Http PreconditionFailed
+	     Http NotModified
+
+	     Cache clear
+	     Cache delete
+
+[14:02] jdc	Private message to colin: when would matching /fred/wilma to /fred be used?
+[14:03]	colin	matching changes in ns done.
+[14:03]	colin	Well, you know in the wiki we allow args to be passed in as trailing parts of the URL?
+[14:03]	colin	That kind of scenario.
+[14:04]	colin	 http://search/somethingtosearchfor 
+[14:04]	colin	You could define a proc /search, and it'd be able to look at [$r -extra] for args
+
+ex6: forms: first DIY, second use Forms utility
+
+ex7: jQ domain
+
+ex8: ini parameters
+
+ex9: nub parameters, interactive nub
+
+Things to cover:
+
+- cookies
+
+- Login domain
+
+- tub
+
+[14:04]	colin	Tub is a generic repository for form values ... it's pretty cool.  You use /get and /set and it'll just happily store whatever values your <form> sends it, and return them.
+[14:04]	colin	So you can bung a bunch of stuff into a tub, container.  All you have to do is tell it at init time what db view to use, and which value keys the rest.
+[14:05]	colin	It also has a /getUser and /setUser entrypoint, they use Basic AUTH for the key.
+[14:05]	colin	and /getCookie /setCookie, which will use the value in the cookie to key the collection of stuff
+
+- tie
+
+[14:05]	colin	Now ... Tie ... that's quite radical.
+[14:06]	colin	Tie is kinda like Direct, but for variables.
+[14:06]	colin	You can point Tie at a given namespace, and it will throw up a web interface allowing you to query and edit them.
+[14:06]	colin	In a reasonably structured way.
+[14:07]	colin	It's basically a live dict editor.
+[14:07]	colin	the idea was to use it to configure the server on the fly.
+
+- coco
+
+[14:08]	colin	Coco's very interesting, too.  You give the coco domain a lambda or procname, and it will construct a coroutine with that functional when you call invoke the top level of the specific Coco domain
+[14:08]	colin	And that coroutine is given a unique name, and the /-access is redirected to the new URL
+14:09]	colin	The Url persists as long as the coro does, and the coro is handed all the data you give it, like a Direct domain /proc is.
+[14:11]	colin	but wht is more:  there's a proc in the Coco ns called form, and *it* is given an html form, and a series of validation scripts (keyed by form variable name) and it will keep invoking itself until the form is completely filled out.
+[14:11]	colin	see copf for how it's used.  It's quite nice for complex multipart forms.
+
+- Convert (see ex4)
+
+[14:15]	colin	Convert is probably one of the most powerful parts of Wub.
+[14:15]	colin	so your page, your Mason or whatever, produces a dict, sets the response content-type to sinorca/html and returns it.  The rest just happens.
+[14:17]	colin	CGI just does CGI.  jQ delives jQuery.  Icons has a set of icons in it.
+[14:18]	colin	Convert takes the set of acceptable mime types requested, and the set of conversion procs available to it (they are all named .from.to)
+[14:18]	colin	and it works out the shortest set of conversion paths to convert from the type it's been given to one of the types it needs to produce
+[14:18]	colin	then it calls 'em one at a time, transforming the request as it goes.
+[14:19]	colin	the file conversions.tcl has some defaults
+[14:19]	colin	Take, for example, jQ.  It needs to load up CSS and JS files.
+[14:19]	colin	but it doesn't know what the content of the response will be.
+[14:20]	colin	So it sticks them in request fields, -preloads -style, etc etc.
+[14:21]	colin	And as long as the rest of the application sets the mime-type of its content to x-text/html-fragment, and Convert is called, it will construct html and bang it in at the beginning or end of the html fragment.
+[14:21]	colin	a simple example is -title.
+[14:21]	colin	If you [dict set response -title "BLAH"], then it's Convert which arranges for that to go into the HTML <head>
+[14:22]	colin	You can also add arbitrary headers, by lappending them to the response's -headers field.
+[14:22]	colin	Convert's kinda wild.
+[14:23]	colin	A lot of stuff in there I haven't used in ages, though.
+[14:23]	jdc_	we could actuall do a wikimarkup/html convert?
+[14:23]	colin	Yeah, sure.
+[14:23]	jdc_	ah stx is there already!
+[14:24]	colin	fetch the page, return it as (say) x-text/wiki, write a proc .x-text/wiki.x-text/html-fragment which calls the conversion, and you're done.
+[14:24]	   * colin nodnods, that's how stx gets converted 
+[14:24]	colin	If you wanted to, incidentally, you could write an html->pdf conversion, and people could download pages in pdf.
+[14:25]	colin	same pages.
+[14:25]	colin	generated the same way.
+[14:25]	colin	you'd have to manipulate the request a bit, but it'd work.
+[14:26]	colin	We could write dict->html conversions, directory->html conversions ...
+[14:26]	colin	I've experimented a bit with that.
+[14:28]	colin	Oh, another thing Convert does - appropriated from tclhttpd: if it finds a proc named .fred, and it converts a file to type .fred, then it'll run *that* script over it.
+[14:28]	colin	so you can do stuff like in tclhttpd, say take .jpg files, look to see if there are any query args to the request, and manipulate the images on the fly.
+
+- honeypot
+
+- repo
+
+- suspend/resume
+
+  - Q : how to send part of the data and then suspend? A: doesn't work with Wub.
+
+- stx
+
+- icons
+
+- ram
+[14:17]	colin	RAM, it's a dict addressable by url
+
+Colin's working on:
+
+- session
+
+Experimental:
+
+- sinorca
+
+[14:11]	colin	Sinorca!  Ahhh, well, that's experimental too.
+[14:11]	colin	What I was trying to do there was build a wrapper around content.  Sinorca's less a domain than a Utility.
+[14:12]	colin	The idea is that instead of returning html, you return a dict with components, those components are named like header, footer, etc.  Those are html fragments.  Sinorca assembles them together and produces HTML that looks pretty
+[14:13]	colin	Sinorca is mostly useful with conversions.  You can define a pseudo mime type, sinorca/html, and a conversion routine .sinorca/html.x-text/html-fragment
+
+Stalled:
+
+- dub
+
+
+General discussions:
+
+[14:30]	jdc_	not doing web stuff for a living, it sometimes hard to see where the different Domains are best used.
+[14:30]	jdc_	when is Direct better then Mason?
+[14:30]	colin	Oh, I'm not really doing it for a living either.
+[14:31]	jdc_	should I rely on Convert or just do it inplace?
+[14:31]	colin	Well, Mason is able to cope with dynamic collections of structured files.
+[14:31]	colin	So you can add new stuff to Mason.  You can't add new stuff to Direct as easily.
+[14:31]	jdc_	whle the server is running?
+[14:32]	colin	Sure, Mason's just running over a file system.
+[14:32]	colin	You can edit it whenever you like.  Add/upload/edit a file.
+[14:33]	colin	And if the contents are kinda free-form, like you just want to put up a document in HTML, but you want to add in some variables or some functional output, then Mason's probably a better way to go.
+[14:33]	colin	You could run a wiki over Mason.
+[14:33]	colin	You couldn't run a wiki over Direct.
+[14:33]	colin	as easily.
+[14:33]	colin	well, kinda.
+[14:34]	colin	That's not *quite* true.  My Pub is mostly Direct
+[14:35]	colin	As to Convert or inplace - again, it depends on how natural the idea of returning something which definitely isn't html and having a transformation applied to it is.
+[14:35]	colin	Like, .stx for example is a defined file type.  So Convert is definitely the way to go.
+[14:36]	colin	All conversions of .stx to .html will do exactly the same thing.
+[14:36]	colin	If I had a well known record format, for example, and wanted always to generate it exactly the same way, everywhere in a system, I'd use Convert.
+[14:37]	jdc_	how'd you add the TOC, headers, footer, .. when using convert? in the convert proc?
+[14:37]	colin	e.g. I think I have a thing somewhere which converts between .csv and .sylk, e.g.
+[14:37]	colin	How would I?
+[14:37]	colin	Oh, how *did* I, in Pub?
+[14:38]	colin	Well, I bunged the bits into the request dict, using names like -footer, etc.
+[14:39]	colin	Then I returned all such requests with a content-type of style/sinorca, and Sinorca roots around in the request, finds the bits and assembles them.
+[14:39]	colin	The code's in Sinorca.tcl
+[14:39]	colin	proc .style/sinorca.x-text/html-fragment
+[14:41]	jdc_	yep, seeing it now.
+[14:41]	colin	Oh, actually, what style/sinorca expects in its request's -content is a dict, with all those fragments in it
+[14:41]	jdc_	seems easier than the subst on the templates we're doing now for the wiki.
+[14:41]	colin	Hell yes 
+[14:42]	colin	The difficulty is coming up with an equivalent of Sinorca which looks just like the wiki does.
+[14:42]	colin	because part of the wiki brief was to not change much of the look and feel
+[14:43]	colin	because we thought ... there are a lot of conservative users ... they'll complain.  In the beginning, the wiki was by no means certain to use Wub at all.
+
