@@ -8,5 +8,12 @@ rewrite {/[^/]+[.]html} {/html/[file tail [dict get $r -path]]}
 
 redirect / /html/ex.html
 
-domain /disk/ {File disk} root / expires tomorrow
+domain /disk/ {File disk} \
+       root       / \
+       indexfile  index.* \
+       hide       {^([.].*)|(.*~)|(\#.*)$} \
+       redirdir   1 \
+       expires    tomorrow \
+       dateformat "%Y %b %d %T" \
+       nodir      0
 
