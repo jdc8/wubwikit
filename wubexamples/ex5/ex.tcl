@@ -1,7 +1,8 @@
-lappend auto_path ../Wub .
+lappend auto_path ../Wub ../tcllib/modules .
 
 package require TclOO
 package require Site
+package require Cache
 
 oo::class create MyOODomain {
     constructor {args} {
@@ -48,6 +49,36 @@ oo::class create MyOODomain {
     method /test_moved { req } {
 	return [Http Moved $req /directoo/test_html_tags]
     } 
+
+
+    method /test_nocache { req } {
+	puts "/test_nocache"
+	dict set req -content "No cache"
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyOODomain: HTML nocache tests"
+	return [Http NoCache $req]	
+    }
+    method /test_cache { req } {
+	puts "/test_cache"
+	dict set req -content "Cache"
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyOODomain: HTML cache tests"
+	return [Http Cache $req]
+    }
+    method /test_dcache { req } {
+	puts "/test_dcache"
+	dict set req -content "DCache"
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyOODomain: HTML dcache tests"
+	return [Http DCache $req]
+    }
+    method /test_cache_clear { req } {
+	Cache clear
+	return [Http Redir $req /directoo/test_html_tags]
+    }
+    method /test_cache_delete { req } {
+    }
+
     method /default { req } { 
 	set content [<p> "Default function for MyOODomain"]
 	set ml {}
@@ -69,18 +100,5 @@ set oodomain [MyOODomain new]
 package require conversions
 set Html::XHTML 1
 set ::conversions::htmlhead {<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">}
-
-namespace eval ::conversions {
-    proc .x-unarmoured-text/html-fragment.x-text/html-fragment { rsp } { 
-	set rspcontent [dict get $rsp -content]
-	if {[string match "<!DOCTYPE*" $rspcontent]} {
-	    # the content is already fully HTML
-	    set content $rspcontent
-	} else {
-	    set content [armour $rspcontent]
-	}	
-	return [Http Ok $rsp $content x-text/html-fragment]	
-    }
-}
 
 Site start home . nubs ex.nub ini ex.ini
