@@ -171,44 +171,16 @@ ex5: Direct domain: Http commands
 	     Http SeeOther
 	     Http Moved
 
-	     Http Suspend/Resume -> later
+	     Http Ok
 
-	     Http File           -> better via File/Mason
-	     Http CacheableFile  -> better via File/Mason
-	     Http Depends
 	     Http NoCache
 	     Http Cache
 	     Http DCache
-	     Http setCtype
-	     Http CacheableContent
-	     Http OkResponse
-	     Http Ok
-	     Http Ok+
-	     Http Pass
-	     Http Create
-	     Http Accepted
-	     Http NonAuthoritative
-	     Http NoContent
-	     Http ResetContent
-	     Http PartialContent
-	     Http NotImplemented
-	     Http Unavailable
-	     Http GatewayTimeout
-	     Http Bad
-	     Http Unauthorized
-	     Http Conflict
-	     Http PreconditionFailed
-	     Http NotModified
 
-	     Cache clear
-	     Cache delete
+	   + Cache clear
+	   - Cache delete
 
-[14:02] jdc	Private message to colin: when would matching /fred/wilma to /fred be used?
-[14:03]	colin	matching changes in ns done.
-[14:03]	colin	Well, you know in the wiki we allow args to be passed in as trailing parts of the URL?
-[14:03]	colin	That kind of scenario.
-[14:04]	colin	 http://search/somethingtosearchfor 
-[14:04]	colin	You could define a proc /search, and it'd be able to look at [$r -extra] for args
+	   - Http Suspend/Resume 
 
 ex6: forms: first DIY, second use Forms utility
 
