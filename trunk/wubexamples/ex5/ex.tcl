@@ -74,9 +74,11 @@ oo::class create MyOODomain {
     }
     method /test_cache_clear { req } {
 	Cache clear
-	return [Http Redir $req /directoo/test_html_tags]
+	return [Http Redir $req /directoo]
     }
     method /test_cache_delete { req } {
+	Cache delete http://[dict get $req host]/directoo/test_cache
+	return [Http Redir $req /directoo]
     }
 
     method /default { req } { 
