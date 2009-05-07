@@ -85,7 +85,16 @@ oo::class create MyOODomain {
 	return $req	
     }
     method /test_post { req a b answer } {
-	puts "a=$a, b=$b, answer=$answer"
+	if {[string is integer -strict $answer] && ($a+$b) == $answer} {
+	    set content [<h1> Correct!!!!!]
+	} else {
+	    set content [<h1> Wrong.]
+	}
+	append content [<a> href /directoo/test Again]
+	dict set req -content $content
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyOODomain: test with query"
+	return $req	
     }
     method /default { req } { 
 	set content [<p> "Default function for MyOODomain"]
