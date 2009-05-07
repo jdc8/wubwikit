@@ -177,12 +177,12 @@ ex5: Direct domain: Http commands
 	     Http Cache
 	     Http DCache
 
-	   + Cache clear
-	   - Cache delete
+	     Cache clear
+	     Cache delete
 
 	   - Http Suspend/Resume 
 
-ex6: forms: first DIY, second use Forms utility
+ex6: forms
 
 ex7: jQ domain
 
@@ -190,9 +190,13 @@ ex8: ini parameters
 
 ex9: nub parameters, interactive nub
 
-Things to cover:
+ex10: suspend/resume
 
-- cookies
+  - Q : how to send part of the data and then suspend? A: doesn't work with Wub.
+
+ex11: cookies
+
+Things to cover:
 
 - Login domain
 
@@ -255,10 +259,6 @@ Things to cover:
 - honeypot
 
 - repo
-
-- suspend/resume
-
-  - Q : how to send part of the data and then suspend? A: doesn't work with Wub.
 
 - stx
 
