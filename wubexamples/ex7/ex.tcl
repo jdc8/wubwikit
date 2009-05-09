@@ -22,7 +22,7 @@ namespace eval MyDirectDomain {
 	set req [jQ jquery $req]
 	set req [jQ ready $req "load_contents();"]
 	dict set req -content $C
-	dict set req -script /scripts/ajax.js {}
+	dict set req -script [list /scripts/ajax.js {}]
 	dict set req content-type x-text/html-fragment
 	dict set req -title "MyDirectDomain: test post method"
 	return $req	
