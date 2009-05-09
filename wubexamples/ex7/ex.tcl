@@ -40,7 +40,6 @@ namespace eval MyDirectDomain {
 	    Doe,Jason,jdoe@hotmail.com,$100.00,http://www.jdoe.com,
 	    Conway,Tim,tconway@earthlink.net,$50.00,http://www.timconway.com
 	}
-	set r [Report csv2dict $cvs]
 	set C [Report html {*}[Report csv2dict $cvs] class tablesorter sortable 0 evenodd 0]
 	set req [jQ tablesorter $req "table"]
 	dict set req -style [list /css/tablesorter.css {}]
