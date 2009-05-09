@@ -19,12 +19,12 @@ namespace eval MyDirectDomain {
     proc /test_ajax { req } { 
 	set C [<div> id contents {}]
 	append C "<button type='button' onclick='load_contents();'>Reload</button>"
-	append C [<script> src /scripts/ajax.js]
-	dict set req -content $C
-	dict set req content-type x-text/html-fragment
-	dict set req -title "MyDirectDomain: test post method"
 	set req [jQ jquery $req]
 	set req [jQ ready $req "load_contents();"]
+	dict set req -content $C
+	dict set req -script /scripts/ajax.js {}
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyDirectDomain: test post method"
 	return $req	
     }
     proc /test_ajax_callback { req } { 
@@ -32,6 +32,23 @@ namespace eval MyDirectDomain {
 	dict set req -content $C
 	dict set req content-type text/html
 	return $req
+    }
+    proc /test_table_sorter { req } {
+	set cvs {last name,first name,email,due,web site
+	    Smith,John,jsmith@gmail.com,$50.00,http://www.jsmith.com
+	    Bach,Frank,fbach@yahoo.com,$50.00,http://www.frank.com
+	    Doe,Jason,jdoe@hotmail.com,$100.00,http://www.jdoe.com,
+	    Conway,Tim,tconway@earthlink.net,$50.00,http://www.timconway.com
+	}
+	set r [Report csv2dict $cvs]
+	set C [Report html {*}[Report csv2dict $cvs] class tablesorter sortable 0 evenodd 0]
+	set req [jQ tablesorter $req "table"]
+	dict set req -style [list /css/tablesorter.css {}]
+	dict set req -content $C
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyDirectDomain: test table sorter"
+	return $req	
+	
     }
     proc /default { req } { 
 	set content "Default function for MyDirectDomain"
