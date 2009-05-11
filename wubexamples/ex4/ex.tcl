@@ -1,4 +1,4 @@
-lappend auto_path ../Wub .
+lappend auto_path ../Wub ../tcllib/modules .
 
 package require TclOO
 package require Site
@@ -40,8 +40,25 @@ namespace eval MyDirectDomain {
 	dict set req -title "MyDirectDomain: plain text test"
 	return $req	
     }
+    proc /test_css_javascripts { req } {
+	set C "Test with css and javascript: "
+	append C [<div> class red id contents {}]
+	append C "<button type='button' onclick='add_contents();'>Add contents</button>"
+	dict set req -content "$C"
+	dict set req -style [list /css/red.css {}]
+	dict set req -script [list /scripts/contents.js {}]
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyDirectDomain: css and javascript test"
+	return $req	
+    }
     proc /default { req } { 
-	dict set req -content "Default function for MyDirectDomain"
+	set content "Default function for MyDirectDomain"
+	set ml {}
+	foreach m [info command ::MyDirectDomain::/test*] {
+	    lappend ml $m /directns[string range $m 18 end]
+	}
+	append content [Html menulist $ml]
+	dict set req -content $content
 	dict set req content-type x-text/html-fragment
 	dict set req -title "MyDirectDomain: default"
 	return $req
@@ -156,6 +173,17 @@ oo::class create MyOODomain {
 	set content [<html> $head$body]
 	dict set req -content $content
 	dict set req content-type text/html
+	return $req	
+    }
+    method /test_css_javascripts { req } {
+	set C "Test with css and javascript: "
+	append C [<div> class red id contents {}]
+	append C "<button type='button' onclick='add_contents();'>Add contents</button>"
+	dict set req -content "$C"
+	dict set req -style [list /css/red.css {}]
+	dict set req -script [list /scripts/contents.js {}]
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyOODomain: css and javascript test"
 	return $req	
     }
     method /default { req } { 

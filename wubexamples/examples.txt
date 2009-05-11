@@ -180,13 +180,16 @@ ex5: Direct domain: Http commands
 	     Cache clear
 	     Cache delete
 
-	   - Http Suspend/Resume 
-
 ex6: forms
 
 ex7: jQ domain
 
+- show how to add extra css, js
+- intro for Report domain
+
 ex8: ini parameters
+
+See Site.tcl
 
 ex9: nub parameters, interactive nub
 
@@ -195,6 +198,11 @@ ex10: suspend/resume
   - Q : how to send part of the data and then suspend? A: doesn't work with Wub.
 
 ex11: cookies
+
+
+
+
+
 
 Things to cover:
 
