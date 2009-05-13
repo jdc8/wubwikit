@@ -158,6 +158,17 @@ ex4: Direct domain: basics and Html commands
 
 		 Foreach (but also If, While)
 
+    - set these in request for conversion from  .x-text/html-fragment.text/html
+
+           -content *
+           -title
+	   -headers
+	   -script <script> <script_args> ?<script> <script_args>? ?...? (added in header)
+	   -style <stylesheet> <sctylsheet_args> ?<stylesheet> <sctylsheet_args>? ?...?
+	   -preload <full scripts statement> ?...? (added in header)
+	   -postscript <script> <script_args> ?<script> <script_args>? ?...? (added at end of body)
+	   -postload <full scripts statement> ?...? (added at end of body)
+
 ex5: Direct domain: Http commands
 
 	     Http Redir
@@ -191,7 +202,7 @@ ex8: ini parameters
 
 See Site.tcl
 
-ex9: nub parameters, interactive nub
+ex9: more nub
 
 ex10: suspend/resume
 
@@ -204,7 +215,7 @@ ex11: cookies
 
 
 
-Things to cover:
+Things to cover another time:
 
 - Login domain
 
