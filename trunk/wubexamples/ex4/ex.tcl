@@ -186,6 +186,18 @@ oo::class create MyOODomain {
 	dict set req -title "MyOODomain: css and javascript test"
 	return $req	
     }
+    method /test_req_opts { req } {
+	set C "Test with request options"
+	append C [<div> class red id contents {}]
+	append C "<button type='button' onclick='add_contents();'>Add contents</button>"
+	dict set req -content "$C"
+	dict set req -preload [<script> src /scripts/contents.js {}]
+	dict set req -postload [<script> "add_contents();"]
+	dict set req -postscript [list /scripts/contents2.js {}]
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyOODomain: request options"
+	return $req		
+    }
     method /default { req } { 
 	set content [<p> "Default function for MyOODomain"]
 	set ml {}
