@@ -211,6 +211,7 @@ ex10: suspend/resume
 ex11: cookies
 
 
+ex12: command port
 
 
 
