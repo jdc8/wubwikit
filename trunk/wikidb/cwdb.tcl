@@ -5,7 +5,7 @@ source cwdb.conf
 
 set do_ssh 1
 set do_scp 1
-set do_mkpack 1
+set do_mkpack 0
 set do_check 1
 set do_zip 1
 set do_ftp 1
@@ -53,6 +53,8 @@ if {$do_scp} {
 if {$do_mkpack} {
     puts "mkpack wikit.tkd and rename in $dbnm"
     exec sdx mkpack wikit.tkd $dbnm
+} else {
+    file copy -force wikit.tkd $dbnm
 }
 
 if {$do_check} {
