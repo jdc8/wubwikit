@@ -20,11 +20,31 @@ namespace eval MyDirectDomain {
 	dict set req -title "MyDirectDomain: suspended"
 	return $req	
     }
+
+    proc /test_suspend2 { req } {
+	append C [<h1> "Suspended Ajax request..."]
+	append C "<button type='button' onclick='load_contents2();'>Make request</button>"
+	append C [<div> id contents {}]
+	set req [jQ jquery $req]
+	set req [jQ ready $req "load_contents2();"]
+	dict set req -content $C
+	dict set req -script [list /scripts/ajax.js {}]
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyDirectDomain: suspended"
+	return $req	
+    }
     proc /test_ajax_callback { req } { 
 	puts "Callback, suspend ..."
 	variable suspended_requests
 	lappend suspended_requests $req [info coroutine]
 	return {-suspend -1}
+
+    }
+    proc /test_ajax_callback2 { req } { 
+	puts "Callback2, suspend ..."
+	variable suspended_requests
+	lappend suspended_requests $req [info coroutine]
+	return [Http Suspend $req]
     }
     proc /test_return_result { req } {
 	puts "Return result"
