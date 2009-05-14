@@ -1,0 +1,28 @@
+
+domain /css/     {File css}     root [file join . docroot css]     expires tomorrow    nodir 1
+domain /images/  {File images}  root [file join . docroot images]  expires "next week" nodir 1
+domain /scripts/ {File scripts} root [file join . docroot scripts] expires tomorrow    nodir 1
+domain /html/    {File html}    root [file join . docroot html]    expires tomorrow    nodir 1
+
+domain /directns/  Direct namespace MyDirectDomain
+domain /directoo/  Direct object    $::oodomain
+
+domain /jquery/ JQ
+
+redirect / /directns
+redirect /favico.ico /images/favico.ico
+
+rewrite /moop {/html/ex.html}
+
+code /clock.txt {clock format [clock seconds]} text/plain
+code default {
+     set r [Http NotFound $r]; 
+     return [<p> "[dict get $r -uri] not found."]
+}
+
+literal /robots.txt "User-agent: *\nDisallow: /" text/plain
+
+block /*.exe
+block /*.php
+block /*.wmv
+block /cgi-bin/
