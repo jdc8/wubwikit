@@ -1,4 +1,4 @@
-lappend auto_path ../Wub .
+lappend auto_path ../Wub ../tcllib/modules .
 
 package require Site
 
