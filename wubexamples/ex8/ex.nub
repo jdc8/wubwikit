@@ -1,0 +1,5 @@
+
+domain /directns/  Direct namespace MyDirectDomain
+
+redirect / /directns
+
