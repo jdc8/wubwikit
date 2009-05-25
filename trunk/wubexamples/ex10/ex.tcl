@@ -33,15 +33,15 @@ namespace eval MyDirectDomain {
 	dict set req -title "MyDirectDomain: suspended"
 	return $req	
     }
-    proc /test_ajax_callback { req } { 
-	puts "Callback, suspend ..."
+    proc /test_ajax_callback { req a } { 
+	puts "Callback, suspend $a ..."
 	variable suspended_requests
 	lappend suspended_requests $req [info coroutine]
 	return {-suspend -1}
 
     }
-    proc /test_ajax_callback2 { req } { 
-	puts "Callback2, suspend ..."
+    proc /test_ajax_callback2 { req a } { 
+	puts "Callback2, suspend $a ..."
 	variable suspended_requests
 	lappend suspended_requests $req [info coroutine]
 	return [Http Suspend $req]
@@ -96,4 +96,4 @@ package require conversions
 set Html::XHTML 1
 set ::conversions::htmlhead {<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">}
 
-Site start home . nubs ex.nub ini ex.ini
+Site start home . nubs ex.nub

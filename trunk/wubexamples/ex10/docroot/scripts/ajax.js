@@ -1,6 +1,6 @@
 function load_contents() 
 {
-    $("#contents").load("/directns/test_ajax_callback");
+    $("#contents").load("/directns/test_ajax_callback?a="+Math.floor(Math.random()*11));
 }
 
 function ajaxpage(url, postData, containerid){
@@ -41,10 +41,13 @@ function loadpage(page_request, containerid){
 	if (page_request.responseText.length) {
 	    document.getElementById(containerid).innerHTML = page_request.responseText;
 	}
+	else {
+	    alert("Empty response text");
+	}
     }
 }
 
 function load_contents2() 
 {
-    ajaxpage("/directns/test_ajax_callback2", "", "contents");
+    ajaxpage("/directns/test_ajax_callback2?a="+Math.floor(Math.random()*11), "", "contents");
 }

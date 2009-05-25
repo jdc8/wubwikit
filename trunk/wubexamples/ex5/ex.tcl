@@ -14,28 +14,29 @@ oo::class create MyOODomain {
 	dict set req -content $content
 	dict set req content-type x-text/html-fragment
 	dict set req -title "MyOODomain: HTML tag command tests"
+	return [Http Ok $req]
+    }
+    method /test_referer {req args} {
+	dict set req -content [<p> "Referer = [Http Referer $req]"]
+	dict set req content-type x-text/html-fragment
+	dict set req -title "MyOODomain: test referer"
 	return $req	
     }
-    method /test_redir { req } {
-	return [Http Redir $req /directoo/test_html_tags]
-    } 
+
+
+    method /test_ok { req } {
+	return [Http Ok $req "Some OK content"]
+    }
+
+
     method /test_redirect { req } {
 	return [Http Redirect $req /directoo/test_html_tags]
     } 
     method /test_found { req } {
 	return [Http Found $req /directoo/test_html_tags]
     } 
-    method /test_notfound { req } {
-	return [Http NotFound $req]
-    } 
-    method /test_forbidden { req } {
-	return [Http Forbidden $req]
-    } 
-    method /test_referer {req args} {
-	dict set req -content [<p> "Referer = [Http Referer $req]"]
-	dict set req content-type x-text/html-fragment
-	dict set req -title "MyOODomain: test referer"
-	return $req	
+    method /test_moved { req } {
+	return [Http Moved $req /directoo/test_html_tags]
     }
     method /test_redirect_to_referer { req } {
 	return [Http RedirectReferer $req]
@@ -46,9 +47,22 @@ oo::class create MyOODomain {
     method /test_see_other { req } {
 	return [Http SeeOther $req /directoo/test_html_tags]
     } 
-    method /test_moved { req } {
-	return [Http Moved $req /directoo/test_html_tags]
+
+
+    method /test_notfound { req } {
+	return [Http NotFound $req]
     } 
+    method /test_forbidden { req } {
+	return [Http Forbidden $req]
+    } 
+    method /test_bad { req } {
+	return [Http Bad $req "Bad reply message"]
+    }
+
+
+    method /test_server_error { req } { 
+	return [Http ServerError $req "Too bad this happened" {1 first 2 second 3 third}]
+    }
 
 
     method /test_nocache { req } {
@@ -72,6 +86,8 @@ oo::class create MyOODomain {
 	dict set req -title "MyOODomain: HTML dcache tests"
 	return [Http DCache $req]
     }
+
+
     method /test_cache_clear { req } {
 	Cache clear
 	return [Http Redir $req /directoo]
@@ -80,6 +96,7 @@ oo::class create MyOODomain {
 	Cache delete http://[dict get $req host]/directoo/test_cache
 	return [Http Redir $req /directoo]
     }
+
 
     method /default { req } { 
 	set content [<p> "Default function for MyOODomain"]

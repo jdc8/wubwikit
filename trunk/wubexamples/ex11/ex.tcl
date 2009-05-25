@@ -55,4 +55,4 @@ package require conversions
 set Html::XHTML 1
 set ::conversions::htmlhead {<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">}
 
-Site start home . nubs ex.nub ini ex.ini
+Site start home . nubs ex.nub
