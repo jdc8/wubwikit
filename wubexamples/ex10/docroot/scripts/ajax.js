@@ -1,6 +1,6 @@
 function load_contents() 
 {
-    $("#contents").load("/directns/test_ajax_callback?a="+Math.floor(Math.random()*11));
+    $("#contents").load("/directns/test_ajax_callback", "test");
 }
 
 function ajaxpage(url, postData, containerid){
@@ -37,17 +37,14 @@ function ajaxpage(url, postData, containerid){
 }
 
 function loadpage(page_request, containerid){
-    if (page_request.readyState == 4 && (page_request.status==200 || window.location.href.indexOf("http")==-1)) {
-	if (page_request.responseText.length) {
+    if (page_request.readyState == 4/* && (page_request.status==200 || window.location.href.indexOf("http")==-1)*/) {
+	if (page_request.responseText != "") {
 	    document.getElementById(containerid).innerHTML = page_request.responseText;
-	}
-	else {
-	    alert("Empty response text");
 	}
     }
 }
 
 function load_contents2() 
 {
-    ajaxpage("/directns/test_ajax_callback2?a="+Math.floor(Math.random()*11), "", "contents");
+    ajaxpage("/directns/test_ajax_callback2", "test", "contents");
 }
