@@ -1,0 +1,3 @@
+cd $1
+/home/decoster/tcl/tcl-head/bin/tclsh8.6 ex.tcl
+
