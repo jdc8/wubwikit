@@ -77,14 +77,14 @@ oo::class create MyOODomain {
 	dict set req -content "Cache"
 	dict set req content-type x-text/html-fragment
 	dict set req -title "MyOODomain: HTML cache tests"
-	return [Http Cache $req]
+	return [Http Cache $req "next week"]
     }
     method /test_dcache { req } {
 	puts "/test_dcache"
 	dict set req -content "DCache"
 	dict set req content-type x-text/html-fragment
 	dict set req -title "MyOODomain: HTML dcache tests"
-	return [Http DCache $req]
+	return [Http DCache $req "next week"]
     }
 
 
@@ -102,11 +102,14 @@ oo::class create MyOODomain {
 	set content [<p> "Default function for MyOODomain"]
 	set ml {}
 	foreach m [info object methods [self] -private -all] {
-	    if {[string match /* $m]} {
+	    if {[string match /*cache* $m]} {
+		lappend cl $m /directoo$m
+	    } elseif {[string match /* $m]} {
 		lappend ml $m /directoo$m
 	    }	    
 	}
-	append content [Html menulist $ml]
+	append content [<p> [Html menulist $ml]]
+	append content [<p> [Html menulist $cl]]
 	dict set req -content $content
 	dict set req content-type x-text/html-fragment
 	dict set req -title "MyOODomain: default"

@@ -64,16 +64,44 @@ http://localhost:8080/directoo
   test_html_tags
 
 ================================================================================
-ex5
+ex5 HTTP commands and caching
 ================================================================================
 
-================================================================================
-ex6
-================================================================================
+http://localhost:8080
+
+  ok
+  moved, redirect, redirectreferer, found, seeother, relocated
+  bad, forbidden, notfound
+  servererror
+
+  nocache (reload)
+  cache (reload)
+  dcache (reload)
+  
+  cache_clear
+  cache_delete
+
+Q Colin: cache clear but still FF does not fetch again
 
 ================================================================================
-ex7
+ex6 Forms
 ================================================================================
+
+http://localhost:8080
+
+  test_get 
+  test_post
+
+================================================================================
+ex7 jQuery
+================================================================================
+
+http://localhost:8080
+
+  ajax (ready)
+  timeentry (plugin)
+  table_sorter
+  styled_table_sorter
 
 ================================================================================
 ex8
