@@ -6,4 +6,4 @@ domain /html/    {File html}    root [file join . docroot html]    expires tomor
 
 domain /directoo/  Direct object    $::oodomain
 
-redirect / /html/ex.html
+redirect / /directoo

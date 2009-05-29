@@ -7,5 +7,5 @@ domain /html/    {File html}    root [file join . docroot html]    expires tomor
 domain /directns/  Direct namespace MyDirectDomain
 domain /directoo/  Direct object    $::oodomain
 
-redirect / /html/ex.html
+redirect / /directns
 
