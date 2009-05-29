@@ -37,8 +37,31 @@ mason2 with !FireFox user-agent (.auth)
 non-existing file (.notfound)
 
 ================================================================================
-ex4
+ex4 Direct
 ================================================================================
+
+http://localhost:8080/directns
+
+  test
+  test_with_query?A=a&B=b&C=c
+  test_without_armour
+  test_with_armour
+  test_with_armour_in_convert (user defined convert)
+  test_plain_text
+  test_css_javascripts (header arguments)
+
+http://localhost:8080/directoo
+
+  test
+  test_with_query?A=a&B=b&C=c
+  test_without_armour
+  test_with_armour
+  test_with_armour_in_convert (user defined convert)
+  test_plain_text
+  test_css_javascripts (header arguments)
+  test_req_opts (more header arguments)
+  test_text_html (no convert)
+  test_html_tags
 
 ================================================================================
 ex5
