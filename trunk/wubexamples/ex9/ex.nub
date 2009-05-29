@@ -15,10 +15,6 @@ redirect /favicon.ico /images/favicon.ico
 rewrite /moop {/html/ex.html}
 
 code /clock.txt {clock format [clock seconds]} text/plain
-code default {
-     set r [Http NotFound $r]; 
-     return [<p> "[dict get $r -uri] not found."]
-}
 
 literal /robots.txt "User-agent: *\nDisallow: /" text/plain
 
