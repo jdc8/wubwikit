@@ -10,7 +10,7 @@ domain /directoo/  Direct object    $::oodomain
 domain /jquery/ JQ
 
 redirect / /directns
-redirect /favico.ico /images/favico.ico
+redirect /favicon.ico /images/favicon.ico
 
 rewrite /moop {/html/ex.html}
 
