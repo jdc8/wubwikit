@@ -67,24 +67,24 @@ oo::class create MyOODomain {
 
     method /test_nocache { req } {
 	puts "/test_nocache"
-	dict set req -content "No cache"
+	dict set req -content "No cache [clock format [clock seconds]]"
 	dict set req content-type x-text/html-fragment
 	dict set req -title "MyOODomain: HTML nocache tests"
 	return [Http NoCache $req]	
     }
     method /test_cache { req } {
 	puts "/test_cache"
-	dict set req -content "Cache"
+	dict set req -content "Cache [clock format [clock seconds]]"
 	dict set req content-type x-text/html-fragment
 	dict set req -title "MyOODomain: HTML cache tests"
 	return [Http Cache $req "next week"]
     }
     method /test_dcache { req } {
 	puts "/test_dcache"
-	dict set req -content "DCache"
+	dict set req -content "DCache [clock format [clock seconds]]"
 	dict set req content-type x-text/html-fragment
 	dict set req -title "MyOODomain: HTML dcache tests"
-	return [Http DCache $req "next week"]
+	return [Http DCache $req 0]
     }
 
 
@@ -94,6 +94,10 @@ oo::class create MyOODomain {
     }
     method /test_cache_delete { req } {
 	Cache delete http://[dict get $req host]/directoo/test_cache
+	return [Http Redir $req /directoo]
+    }
+    method /test_dcache_delete { req } {
+	Cache delete http://[dict get $req host]/directoo/test_dcache
 	return [Http Redir $req /directoo]
     }
 
