@@ -37,7 +37,7 @@ namespace eval MyDirectDomain {
 	puts "Callback, suspend $a ..."
 	variable suspended_requests
 	lappend suspended_requests $req [info coroutine]
-	return {-suspend -1}
+	return [Httpd Suspend $req]
 
     }
     proc /test_ajax_callback2 { req a } { 
@@ -59,7 +59,6 @@ namespace eval MyDirectDomain {
 	append C [<h1> "Resuming Ajax requests..."]
 	foreach {r cr} $suspended_requests {
 	    append C [<p> $r]
-#	    after 1 [list catch [list $cr [list RESUME [/test_return_result $r]]]]
 	    Httpd Resume [/test_return_result $r]
 	}
 	set suspended_requests {}
