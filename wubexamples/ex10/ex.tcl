@@ -59,7 +59,8 @@ namespace eval MyDirectDomain {
 	append C [<h1> "Resuming Ajax requests..."]
 	foreach {r cr} $suspended_requests {
 	    append C [<p> $r]
-	    after 1 [list catch [list $cr [list RESUME [/test_return_result $r]]]]
+#	    after 1 [list catch [list $cr [list RESUME [/test_return_result $r]]]]
+	    Httpd Resume [/test_return_result $r]
 	}
 	set suspended_requests {}
 	dict set req -content $C
