@@ -36,15 +36,15 @@ namespace eval MyDirectDomain {
     proc /test_ajax_callback { req a } { 
 	puts "Callback, suspend $a ..."
 	variable suspended_requests
-	lappend suspended_requests $req [info coroutine]
+	lappend suspended_requests $req
 	return [Httpd Suspend $req]
 
     }
     proc /test_ajax_callback2 { req a } { 
 	puts "Callback2, suspend $a ..."
 	variable suspended_requests
-	lappend suspended_requests $req [info coroutine]
-	return [Http Suspend $req]
+	lappend suspended_requests $req
+	return [Httpd Suspend $req]
     }
     proc /test_return_result { req } {
 	puts "Return result"
@@ -57,9 +57,9 @@ namespace eval MyDirectDomain {
 	puts "Resume suspended requests"
 	variable suspended_requests
 	append C [<h1> "Resuming Ajax requests..."]
-	foreach {r cr} $suspended_requests {
+	foreach r $suspended_requests {
 	    append C [<p> $r]
-	    Httpd Resume [/test_return_result $r]
+	    Httpd Resume [Http NoCache [Http Ok [/test_return_result $r]]]
 	}
 	set suspended_requests {}
 	dict set req -content $C
@@ -70,7 +70,7 @@ namespace eval MyDirectDomain {
     proc /test_suspended { req } {
 	variable suspended_requests
 	append C [<h1> "Suspended Ajax requests:"]
-	foreach {r cr} $suspended_requests {
+	foreach r $suspended_requests {
 	    append C [<p> $r]
 	}
 	dict set req -content $C
