@@ -81,8 +81,6 @@ http://localhost:8080
   cache_clear
   cache_delete
 
-Q Colin: cache clear but still FF does not fetch again
-
 ================================================================================
 ex6 Forms
 ================================================================================
