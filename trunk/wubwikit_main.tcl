@@ -7,6 +7,7 @@ if {![catch {package require starkit}]} {
     namespace eval ::starkit {
 	variable topdir [file dirname [file normalize [info script]]]
     }
+    package require Mk4tcl
 }
 
 proc help { } {
@@ -483,6 +484,9 @@ base=
     }
 
     package require struct
+    if {$::tcl_platform(platform) eq "windows"} {
+        package require registry
+    }
     cd [file join $kit_dir lib wikitcl wikit]
     source gui.tcl
     Wikit::WikiDatabase $wikidb
