@@ -166,8 +166,20 @@ Options in Tk mode:
 
     Set size of sub-sub-title font. Default is `14`. The sub-sub-title font is
     also made italic.
-}
-}
+
+Utilities:
+
+  util ids
+
+    Print one line per page with page-id, indication if ok or empty and page
+    title to standard output.
+
+  util html page <page-id>
+
+    Print html for specified page. This assumes a server is running on the
+    localhost.
+
+} }
 
 proc mkdb { fnm title } { 
 
@@ -278,12 +290,16 @@ set ttitle "Welcome to the Tclers Wiki starkit!"
 set mkdb 0
 set dbfilename ""
 set url ""
+set util ""
+set page -1
 
 foreach {key val} $iargv {
     switch -exact -- $key {
 	wub -
 	port -
-	cmdport {
+	cmdport -
+	util -
+	page {
 	    set $key $val 
 	}
 	toc { 
@@ -365,6 +381,32 @@ if {[info exists uTOC]} {
 	mk::file commit tdb
 	mk::file close tdb
     }
+}
+
+if {[string length $util]} {
+    switch -exact -- $util {
+	ids {
+	    mk::file open xdb $twikidb -readonly
+	    foreach page [mk::select xdb.pages] {
+		puts [list \
+			  $page \
+			  [expr {([mk::get xdb.pages!$page date] > 0 && [string length [mk::get xdb.pages!$page page]] > 1) ? "ok" : "empty"}] \
+			  [mk::get xdb.pages!$page name]
+		     ]
+	    }
+	    mk::file close xdb
+	}
+	html {
+	    package require http
+	    set tkn [http::geturl http://localhost:$port/$page]
+	    puts [http::data $tkn]
+	    http::cleanup $tkn
+	}
+	default {
+	    error "Unknown util specified. Use 'html' or 'ids'."
+	}
+    }
+    exit
 }
 
 namespace eval Wikit {
