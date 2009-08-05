@@ -176,8 +176,8 @@ Utilities:
 
   util html page <page-id>
 
-    Print html for specified page. This assumes a server is running on the
-    localhost.
+    Print html for specified page to standard output. This assumes a server is
+    running on the localhost.
 
 } }
 
@@ -362,7 +362,7 @@ if {$mkdb} {
     exit
 }
 
-if {![info exists twikidb]} {
+if {$util ne "html" && ![info exists twikidb]} {
     error "No wiki database specified, use 'wikidb <file>' option to specify a wiki data base."
 }
 
