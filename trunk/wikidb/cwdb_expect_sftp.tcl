@@ -7,12 +7,12 @@ set timeout -1
 spawn sftp $sourceforge_user@frs.sourceforge.net
 
 expect {
-    -ex "$sourceforge_user@frs.sourceforge.net's password: " {
+    -ex "$sourceforge_user,tclerswikidata@frs.sourceforge.net's password: " {
     } -re . {
 	exp_continue
     }
     default {
-	puts "Could not connect to $sourceforge_user@frs.sourceforge.net"
+	puts "Could not connect to $sourceforge_user,tclerswikidata@frs.sourceforge.net"
 	exit 2
     }
 }
@@ -25,12 +25,12 @@ expect {
 	exp_continue
     }
     default {
-	puts "Could not connect to $sourceforge_user@frs.sourceforge.net"
+	puts "Could not connect to $sourceforge_user,tclerswikidata@frs.sourceforge.net"
 	exit 3
     }    
 }
 
-exp_send "cd uploads\r"
+exp_send "cd \"/home/pfs/project/t/tc/tclerswikidata/Tcler_s wiki database\"\r"
 
 expect {
     -ex "sftp> " {
