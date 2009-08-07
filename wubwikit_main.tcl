@@ -174,10 +174,15 @@ Utilities:
     Print one line per page with page-id, indication if ok or empty and page
     title to standard output.
 
-  util html page <page-id>
+  util html page <page-id> ?opath <path>?
 
-    Print html for specified page to standard output. This assumes a server is
-    running on the localhost.
+    Print html for specified page to file <opath>/<page-id>.html
+
+  util html pages <file> ?opath <path>?
+
+    Print html for each page specified with its <page-id> in <file> to file
+    <opath>/<page-id>.html. Puts each page-id as a separate line in <file>. The
+    output of the util ids command can be used as input for this command.
 
 } }
 
@@ -237,14 +242,14 @@ proc mkdb { fnm title } {
 	page "Your wiki help and formatting rules go here." \
 	date [clock seconds] \
 	who init
-
+    
     # Page 4
     mk::row append $db.pages \
 	name "Recent Changes" \
 	page "Generated." \
 	date [clock seconds] \
 	who init
-
+    
     # Other reserved pages
     foreach p {5 6 7 8 9} {
 	mk::row append $db.pages \
@@ -253,17 +258,78 @@ proc mkdb { fnm title } {
 	    date [clock seconds] \
 	    who init
     }
-
+    
     mk::file commit $db
-
+    
     mk::file close $db
-
+    
     set f [open $fnm.toc w]
     close $f
-
+    
     puts "Start wubwikit with these options:\n\n    wub <boolean> wikidb $fnm.tkd toc file:$fnm.toc welcomezero 1\n"
 }
 
+# from "Invoking browsers" in the wiki
+proc launchBrowser url {
+    global tcl_platform
+    
+    # It *is* generally a mistake to switch on $tcl_platform(os), particularly
+    # in comparison to $tcl_platform(platform).  For now, let's just regard it
+    # as a stylistic variation subject to debate.
+    switch $tcl_platform(os) {
+	Darwin {
+	    set command [list open $url]
+	}
+	HP-UX -
+	Linux  -
+	SunOS {
+	    foreach executable {firefox mozilla netscape iexplorer opera lynx
+		w3m links epiphany galeon konqueror mosaic amaya
+		browsex elinks} {
+		set executable [auto_execok $executable]
+		if [string length $executable] {
+		    # Do you want to mess with -remote?  How about other browsers?
+		    set command [list $executable $url &]
+		    break
+		}
+	    }
+	}
+	{Windows 95} -
+	{Windows NT} {
+	    # auto_execok need system vars in uppercase...
+	    foreach key [array names ::env] {
+		set ::env([string toupper $key]) $::env($key)
+	    } 
+	    auto_reset
+	    set command "[auto_execok start] {} [list $url]"
+	}
+    }
+    if [info exists command] {
+	# Replace {*}$command by eval "$command" if you want < tcl 8.5 compatibility ([RA])
+        # Added the '&' to launch the browser as background process. [Duoas]
+	if [catch {exec {*}$command &} err] {
+	    tk_messageBox -icon error -message "error '$err' with '$command'"
+	}
+    } else {
+	tk_messageBox -icon error -message \
+	    "Please tell CL that ($tcl_platform(os), $tcl_platform(platform)) is not yet ready for browsing."
+    }
+}
+
+proc makeGui {port} {
+    if {[catch "package require Tk"]} {
+        return
+    }
+    namespace import ::ttk::*
+    wm protocol . WM_DELETE_WINDOW { ::exit }
+    wm title . "Wiki Server"
+    set l [label .lblMsg -text "Wiki server listen in port $port"]
+    grid $l -row 0 -column 0 -columnspan 3 -padx 5 -pady 5
+    set b [button .btnStop -text "Stop Server" -command "exit"]
+    grid  $b -row 1 -column 0 -padx 5 -pady 5
+    set b [button .btnOpen -text "Open in browser" -command "launchBrowser http://localhost:$port"]
+    grid $b -row 1 -column 1 -padx 5 -pady 5
+}
 
 set iargv $argv
 set argv {}
@@ -291,7 +357,9 @@ set mkdb 0
 set dbfilename ""
 set url ""
 set util ""
-set page -1
+set page ""
+set pages ""
+set opath ""
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -299,7 +367,9 @@ foreach {key val} $iargv {
 	port -
 	cmdport -
 	util -
-	page {
+	page -
+	pages - 
+	opath {
 	    set $key $val 
 	}
 	toc { 
@@ -362,11 +432,47 @@ if {$mkdb} {
     exit
 }
 
-if {$util ne "html" && ![info exists twikidb]} {
+if {![info exists twikidb]} {
     error "No wiki database specified, use 'wikidb <file>' option to specify a wiki data base."
 }
 
 lappend auto_path [file join $kit_dir lib] [file join $kit_dir lib wikitcl] [file join $kit_dir lib wub]
+
+
+proc get_pages_html { } {
+    global pages port opath page util_dir
+    if {[catch {socket localhost $port} msg]} {
+	puts "Waiting for server ..."
+	after 100 get_pages_html
+	return
+    }
+    package require http
+    if {[string length $pages]} {
+	set f [open [file join $util_dir $pages] r]
+	foreach l [split [read $f] \n] {
+	    set l [string trim $l]
+	    if {[string length $l]} {
+		puts "Get page $page"
+		set page [lindex $l 0]
+		set tkn [http::geturl http://localhost:$port/$page]
+		set o [open [file join $util_dir $opath $page.html] w]
+		puts $o [http::data $tkn]
+		close $o
+		http::cleanup $tkn
+	    }
+	}
+	close $f
+    } 
+    if {[string length $page]} {
+	puts "Get page $page"
+	set tkn [http::geturl http://localhost:$port/$page]
+	set o [open [file join $util_dir $opath $page.html] w]
+	puts $o [http::data $tkn]
+	close $o
+	http::cleanup $tkn
+    }
+    exit
+}
 
 if {[info exists uTOC]} {
     if { $wub } { 
@@ -395,18 +501,17 @@ if {[string length $util]} {
 		     ]
 	    }
 	    mk::file close xdb
+	    exit
 	}
 	html {
-	    package require http
-	    set tkn [http::geturl http://localhost:$port/$page]
-	    puts [http::data $tkn]
-	    http::cleanup $tkn
+	    set wub 1
+	    set util_dir [pwd]
+	    get_pages_html
 	}
 	default {
 	    error "Unknown util specified. Use 'html' or 'ids'."
 	}
     }
-    exit
 }
 
 namespace eval Wikit {
@@ -425,6 +530,8 @@ namespace eval Wikit {
 }
 
 if { $wub } {
+
+    makeGui $port    
 
     # Args to pass to wub/nub/wikitcl
     # port, cmdport, wikidb
