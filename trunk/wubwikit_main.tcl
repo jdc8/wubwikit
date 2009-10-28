@@ -274,7 +274,7 @@ proc makeGui {port} {
     namespace import ::ttk::*
     wm protocol . WM_DELETE_WINDOW { ::exit }
     wm title . "Wiki Server"
-    set l [label .lblMsg -text "Wiki server listen in port $port"]
+    set l [label .lblMsg -text "Wiki server listening on port $port"]
     grid $l -row 0 -column 0 -columnspan 3 -padx 5 -pady 5
     set b [button .btnStop -text "Stop Server" -command "exit"]
     grid  $b -row 1 -column 0 -padx 5 -pady 5
@@ -313,7 +313,6 @@ set pages ""
 set opath ""
 
 foreach {key val} $iargv {
-    puts "$key / $val"
     switch -exact -- $key {
 	wub -
 	port -
@@ -513,9 +512,7 @@ base=
 }
 close $f
 
-puts "set ::starkit_wikittitle $ttitle"
 set ::starkit_wikittitle $ttitle
-puts "set ::starkit_welcomezero $welcomezero"
 set ::starkit_welcomezero $welcomezero
 if {[string length $url]} {
     set ::starkit_url $url
