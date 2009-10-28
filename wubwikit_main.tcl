@@ -12,6 +12,61 @@ if {![catch {package require starkit}]} {
 package require tdbc
 package require tdbc::sqlite3
 
+set sql(count_pages) {
+    SELECT COUNT(*) 
+    FROM pages
+}
+
+set sql(count_empty_pages) {
+    SELECT COUNT(*) 
+    FROM pages a, pages_content b 
+    WHERE a.id = b.id 
+    AND length(b.content) < 2
+}
+
+set sql(non_empty_pages_without_references_to_others) {
+    SELECT a.id, a.name 
+    FROM pages a, pages_content b 
+    WHERE a.id = b.id 
+    AND length(b.content) > 1 
+    AND a.id NOT IN (SELECT fromid FROM refs)
+}
+
+set sql(non_empty_pages_unreferenced_by_others) {
+    SELECT a.id, a.name 
+    FROM pages a, pages_content b 
+    WHERE a.id = b.id 
+    AND length(b.content) > 1 
+    AND a.id NOT IN (SELECT toid FROM refs)
+}
+
+set sql(pages_content) {
+    SELECT id, content
+    FROM pages_content
+    WHERE length(content) > 1
+}
+
+set sql(non_empty_pages) {
+    SELECT a.id, a.name 
+    FROM pages a, pages_content b 
+    WHERE a.id = b.id 
+    AND length(b.content) > 1 
+}
+
+set sql(references_to_other_pages) {
+    SELECT a.id, a.name, b.toid
+    FROM pages a, refs b
+    WHERE a.id = b.toid
+    ORDER BY a.id, b.toid
+}
+
+set sql(references_from_other_pages) {
+    SELECT a.id, a.name, b.fromid
+    FROM pages a, refs b
+    WHERE a.id = b.toid
+    ORDER BY a.id, b.fromid
+}
+
 proc help { } {
     puts {
 
@@ -133,8 +188,13 @@ Utilities:
     Print html for each page specified with its <page-id> in <file> to file
     <opath>/<page-id>.html. Puts each page-id as a separate line in <file>. The
     output of the util ids command can be used as input for this command.
+} 
 
-} }
+foreach k [lsort -dictionary [array names ::sql]] {
+    puts "  util $k\n"
+}
+
+}
 
 proc mkdb_exec {sql} {
     set stmt [db prepare $sql]
@@ -433,29 +493,43 @@ if {[info exists uTOC]} {
 }
 
 if {[string length $util]} {
-    switch -exact -- $util {
-	ids {
-	    tdbc::sqlite3::connection create db $twikidb
-	    set stmt [db prepare {SELECT a.id, a.date, b.content, a.name FROM pages a, pages_content b WHERE a.id = b.id}]
-	    $stmt foreach -as dicts d {
-		puts [list \
-			  [dict get $d id] \
-			  [expr {([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty"}] \
-			  [dict get $d name]
-		     ]
+    if {$util eq "html"} {
+	set wub 1
+	set util_dir [pwd]
+	get_pages_html
+    } else {
+	tdbc::sqlite3::connection create db $twikidb
+	switch -exact -- $util {
+	    ids {
+		set stmt [db prepare {SELECT a.id, a.date, b.content, a.name FROM pages a, pages_content b WHERE a.id = b.id}]
+		$stmt foreach -as dicts d {
+		    puts [list \
+			      [dict get $d id] \
+			      [expr {([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty"}] \
+			      [dict get $d name]
+			 ]
+		}
+		$stmt close
 	    }
-	    $stmt close
-	    db close
-	    exit
+	    pages {
+		set stmt [db prepare $sql($util)]
+		$stmt foreach -as dicts d {
+		    set f [open [dict get $d id].txt w]
+		    puts $f [dict get $d content]
+		    close $f
+		}
+		$stmt close
+	    }
+	    default {
+		set stmt [db prepare $sql($util)]
+		$stmt foreach -as dicts d {
+		    puts $d
+		}
+		$stmt close
+	    }
 	}
-	html {
-	    set wub 1
-	    set util_dir [pwd]
-	    get_pages_html
-	}
-	default {
-	    error "Unknown util specified. Use 'html' or 'ids'."
-	}
+	db close
+	exit
     }
 }
 
