@@ -7,8 +7,10 @@ if {![catch {package require starkit}]} {
     namespace eval ::starkit {
 	variable topdir [file dirname [file normalize [info script]]]
     }
-    package require Mk4tcl
 }
+
+package require tdbc
+package require tdbc::sqlite3
 
 proc help { } {
     puts {
@@ -23,12 +25,10 @@ Usage as unwrapped starkit or unzippped archive:
 
 Requirements:
 
-    - tclkit based on Tcl/Tk 8.6
-
-  or
-
-    - tclsh based on Tcl/Tk 8.6 
-    - package Mk4tcl
+    - tclkit or tclsh based on Tcl/Tk 8.6
+    - package tdbc
+    - package tdbc::sqlite3
+    - package sqlite3
 
 Typical usage:
 
@@ -41,17 +41,13 @@ Typical usage:
       mywiki.tkd      A new wiki database
       mywiki.toc      A new wiki table of contents
 
-- Start the wiki as Web application:
+- Start a wiki:
 
-    % tclkit wubwikit.kit wub 1 wikidb mywiki.tkd toc file:mywiki.toc welcomezero 1
+    % tclkit wubwikit.kit wikidb mywiki.tkd toc file:mywiki.toc welcomezero 1
 
-- Start the wiki as Tk application:
+- Start a wiki with a copy of the Tcler's wiki database:
 
-    % tclkit wubwikit.kit wub 0 wikidb mywiki.tkd toc file:mywiki.toc
-
-- Start the wiki with a copy of the Tcler's wiki database as Web application:
-
-    % tclkit wubwikit.kit wub 1 wikidb wikit.tkd
+    % tclkit wubwikit.kit wikidb wikit.tkd
 
 Basic options:
  
@@ -59,42 +55,41 @@ Basic options:
 
     Show this message
 
-  port <port>                           
-
-    Set port used by [Wub]
-
   wikidb <path>                         
 
-    Set path to wiki database. Mandatory!
+    Set path to Wiki database. Mandatory!
 
-  wub <boolean>                         
+  mkdb <path> 
 
-    Run as [Wub] based web-server if true, run as [Tk] application if false (default).
-
-  edit_template file:<path>
-  edit_template <text>
-
-    Set text to be used when editing a page for the first time.    
+    Create empty Wiki database and TOC file.
 
 Options to set Table Of Contents (TOC):
 
   toc file:<path>                       
 
-    Use the contents of the specified file as table of contents in [Wub]
-    mode. Copy contents of the specified file to page 8 of the specified wiki
-    database to use it as table of contents in [Tk] mode.
+    Use the contents of the specified file as table of contents.
 
-  toc wub                               
+Options for Wub:
 
-    Copy table of contents as found in the starkit to page 8 of the specified
-    wiki database to use it as table of contents in [Tk] mode.
+  port <port>                           
 
-Options in Wub mode:
+    Set port used by [Wub]
 
   cmdport <port>                        
 
     Set command port used by [Wub], you can `telnet` to this port to interface
     with the webserver.
+
+  logfile <file>                        
+
+    Set name of log file
+
+Options to customise your Wiki:
+
+  edit_template file:<path>
+  edit_template <text>
+
+    Set text to be used when editing a page for the first time.    
 
   image <file>                          
 
@@ -103,10 +98,6 @@ Options in Wub mode:
 
         favicon.ico      The favicon
         plume.png        The plume shown top-right, with background color #CCC
-
-  logfile <file>                        
-
-    Set name of log file
 
   title <text>                          
 
@@ -125,47 +116,6 @@ Options in Wub mode:
     When set to true, page 0 from the database will be used as welcome
     page. When set to false, the file 'welcome.html' will be used as welcome
     page.
-
-Options in Tk mode:
-
-  font_buttonsize <size>                
-
-    Set the size of the font used to display text in buttons. Default is `9` on
-    windows and `11` on other platforms.
-
-  font_default <size>                   
-
-    Set the size of the font used to display text. Default is `9` on windows and
-    `12` on other platforms.
-
-  font_family <font-family-name>        
-
-    Set the name of the font-family to be used for non fixed-width test. Default
-    is `arial`.
-
-  font_fixedfamily <font-family-name>  
-
-    Set the name of the font-familt to be used for fixed-width test. Default is
-    `courier`.
-
-  font_thin <size>                      
-
-    Set size of thin font. Default is `4`. This font is used to create
-    horizontal lines.
-
-  font_title <size>                     
-
-    Set size of title font. Default is `16`. The title font is also made bold.
-
-  font_title <size3>                    
-
-    Set size of sub-title font. Default is `14`. The sub-title font is also made
-    bold and italic.
-
-  font_title <size4>                    
-
-    Set size of sub-sub-title font. Default is `14`. The sub-sub-title font is
-    also made italic.
 
 Utilities:
 
@@ -186,6 +136,13 @@ Utilities:
 
 } }
 
+proc mkdb_exec {sql} {
+    set stmt [db prepare $sql]
+    set rs [uplevel $stmt execute]
+    $rs close
+    $stmt close
+}
+
 proc mkdb { fnm title } { 
 
     if {[file exists $fnm.tkd]} {
@@ -196,77 +153,71 @@ proc mkdb { fnm title } {
 	error "Table of contents '$fnm.toc' already exists"
     }
 
-    set db [mk::file open db $fnm.tkd]
-
-    mk::view layout $db.pages {
-	name
-	page
-	date:I
-	who
-	{changes {
-	    date:I
-	    who
-	    delta:I
-	    {diffs {
-		from:I to:I old
-	    }}
-	}}
+    tdbc::sqlite3::connection create db $fnm.tkd
+    mkdb_exec {PRAGMA foreign_keys = ON}
+    mkdb_exec { 
+	CREATE TABLE pages (id INT NOT NULL,
+			    name TEXT NOT NULL,
+			    date INT NOT NULL,
+			    who TEXT NOT NULL,
+			    PRIMARY KEY (id))
     }
-    
-    mk::view layout $db.refs {from:I to:I}
-
-    # Page 0
-    mk::row append $db.pages \
-	name $title \
-	page "Your wiki starts here!" \
-	date [clock seconds] \
-	who init
-
-    # Page 1
-    mk::row append $db.pages \
-	name "Page 1" \
-	page "Not used." \
-	date [clock seconds] \
-	who init
-
-    # Page 2
-    mk::row append $db.pages \
-	name "Search" \
-	page "Generated." \
-	date [clock seconds] \
-	who init
-
-    # Page 3
-    mk::row append $db.pages \
-	name "Help" \
-	page "Your wiki help and formatting rules go here." \
-	date [clock seconds] \
-	who init
-    
-    # Page 4
-    mk::row append $db.pages \
-	name "Recent Changes" \
-	page "Generated." \
-	date [clock seconds] \
-	who init
-    
-    # Other reserved pages
-    foreach p {5 6 7 8 9} {
-	mk::row append $db.pages \
-	    name "Page $p" \
-	    page "Not used." \
-	    date [clock seconds] \
-	    who init
+    mkdb_exec { 
+	CREATE TABLE pages_content (id INT NOT NULL,
+				    content TEXT NOT NULL,
+				    PRIMARY KEY (id),
+				    FOREIGN KEY (id) REFERENCES pages(id))
     }
-    
-    mk::file commit $db
-    
-    mk::file close $db
-    
+    mkdb_exec {
+	CREATE TABLE changes (id INT NOT NULL,
+			      cid INT NOT NULL,
+			      date INT NOT NULL,
+			      who TEXT NOT NULL,
+			      delta TEXT NOT NULL,
+			      PRIMARY KEY (id, cid),
+			      FOREIGN KEY (id) REFERENCES pages(id))
+    }
+    mkdb_exec {
+	CREATE TABLE diffs (id INT NOT NULL,
+			    cid INT NOT NULL,
+			    did INT NOT NULL,
+			    fromline INT NOT NULL,
+			    toline INT NOT NULL,	
+			    old TEXT NOT NULL,
+			    PRIMARY KEY (id, cid, did),
+			    FOREIGN KEY (id, cid) REFERENCES changes(id, cid))
+    }
+    mkdb_exec {
+	CREATE TABLE refs (fromid INT NOT NULL,
+			   toid INT NOT NULL,
+			   PRIMARY KEY (fromid, toid),
+			   FOREIGN KEY (fromid) references pages(id),
+			   FOREIGN KEY (toid) references pages(id))
+    }
+    mkdb_exec {CREATE INDEX refs_toid_index ON refs (toid)}
+    set date [clock seconds]
+    set who "init"
+
+    set ids   [list 0                        1           2             3                                             4]
+    set names [list $title                  "Page 1"    "Search"      "Help"                                        "Recent Changes"]
+    set pages [list "Your Wiki starts here!" "Not used." "Generated." "Your wiki help and formatting rules go here." "Generated."]
+    foreach id $ids name $names page $pages {
+	mkdb_exec {INSERT INTO pages (id, name, date, who) VALUES (:id, :name, :date, :who)}
+	mkdb_exec {INSERT INTO pages_content (id, content) VALUES (:id, :page)}
+    }
+    foreach id {5 6 7 8 9} {
+	set name "Page $id"
+	set page "Not used."
+	mkdb_exec {INSERT INTO pages (id, name, date, who) VALUES (:id, :name, :date, :who)}
+	mkdb_exec {INSERT INTO pages_content (id, content) VALUES (:id, :page)}
+    }
+
+    db close
+
     set f [open $fnm.toc w]
     close $f
     
-    puts "Start wubwikit with these options:\n\n    wub <boolean> wikidb $fnm.tkd toc file:$fnm.toc welcomezero 1\n"
+    puts "Start wubwikit with these options:\n\n    wikidb $fnm.tkd toc file:$fnm.toc welcomezero 1\n"
 }
 
 # from "Invoking browsers" in the wiki
@@ -362,6 +313,7 @@ set pages ""
 set opath ""
 
 foreach {key val} $iargv {
+    puts "$key / $val"
     switch -exact -- $key {
 	wub -
 	port -
@@ -475,18 +427,10 @@ proc get_pages_html { } {
 }
 
 if {[info exists uTOC]} {
-    if { $wub } { 
-	set fnm [file join $kit_dir lib/wikitcl/wubwikit/docroot TOC]
-	set f [open $fnm w]
-	puts $f $uTOC
-	close $f
-    } else {
-	puts "Adding TOC to $twikidb"
-	mk::file open tdb $twikidb
-	mk::set tdb.pages!8 name "Wiki TOC" page $uTOC
-	mk::file commit tdb
-	mk::file close tdb
-    }
+    set fnm [file join $kit_dir lib/wikitcl/wubwikit/docroot TOC]
+    set f [open $fnm w]
+    puts $f $uTOC
+    close $f
 }
 
 if {[string length $util]} {
@@ -514,32 +458,15 @@ if {[string length $util]} {
     }
 }
 
-namespace eval Wikit {
-    proc getFontInfo { } {
-	global font_info
-	lappend rl family      $font_info(family)
-	lappend rl fixedfamily $font_info(fixedfamily)
-	lappend rl title       $font_info(title)
-	lappend rl title3      $font_info(title3)
-	lappend rl title4      $font_info(title4)
-	lappend rl thin        $font_info(thin)
-	lappend rl default     $font_info(default)
-	lappend rl buttonsize  $font_info(buttonsize)
-	return $rl
-    }
-}
+makeGui $port    
 
-if { $wub } {
+# Args to pass to wub/nub/wikitcl
+# port, cmdport, wikidb
 
-    makeGui $port    
+cd [file join $kit_dir lib wikitcl wubwikit]
 
-    # Args to pass to wub/nub/wikitcl
-    # port, cmdport, wikidb
-
-    cd [file join $kit_dir lib wikitcl wubwikit]
-
-    set f [open wikit.ini w]
-    puts $f {# Generated ini file, port, cmdport based on command line args
+set f [open wikit.ini w]
+puts $f {# Generated ini file, port, cmdport based on command line args
 [cache]
 high=100
 low=90
@@ -584,61 +511,24 @@ nubdir=.
 [wikitwub]
 base=
 }
-    close $f
+close $f
 
-    set ::starkit_wikittitle $ttitle
-    set ::starkit_welcomezero $welcomezero
-    if {[string length $url]} {
-        set ::starkit_url $url
-    }
-
-    if {[info exists twikidb]} {
-        set ::starkit_wikitdbpath $twikidb
-    } else {
-        set ::starkit_wikitdbpath [file join $kit_dir lib wikitcl wubwikit doc.sample wikit.tkd]
-    }
-
-    if {[string length $welcome_file]} {
-        file copy -force $welcome_file [file join $kit_dir lib wikitcl wubwikit docroot html]
-    }
-
-    foreach f $image_files {
-        file copy -force $f [file join $kit_dir lib wikitcl wubwikit docroot images]
-    }
-    
-    source WikitWub.tcl
-
-} else {
-
-    set font_info(family) arial
-    set font_info(fixedfamily) courier
-    set font_info(title) 16
-    set font_info(title3) 14
-    set font_info(title4) 14
-    set font_info(thin) 4
-    if {[string match Windows* $::tcl_platform(os)]} {
-	set font_info(default) 9
-	set font_info(buttonsize) 9
-    } else {
-	set font_info(default) 12
-	set font_info(buttonsize) 11
-    }
-
-    foreach {key val} $argv {
-	if { [string match "font_*" $key] } {
-	    set font_info([string range $key 5 end]) $val
-	} else {
-	    set $key $val
-	}
-    }
-
-    package require struct
-    if {$::tcl_platform(platform) eq "windows"} {
-        package require registry
-    }
-    cd [file join $kit_dir lib wikitcl wikit]
-    source gui.tcl
-    Wikit::WikiDatabase $wikidb
-    Wikit::LocalInterface 
-    exit
+puts "set ::starkit_wikittitle $ttitle"
+set ::starkit_wikittitle $ttitle
+puts "set ::starkit_welcomezero $welcomezero"
+set ::starkit_welcomezero $welcomezero
+if {[string length $url]} {
+    set ::starkit_url $url
 }
+
+set ::starkit_wikitdbpath $twikidb
+
+if {[string length $welcome_file]} {
+    file copy -force $welcome_file [file join $kit_dir lib wikitcl wubwikit docroot html]
+}
+
+foreach f $image_files {
+    file copy -force $f [file join $kit_dir lib wikitcl wubwikit docroot images]
+}
+
+source WikitWub.tcl
