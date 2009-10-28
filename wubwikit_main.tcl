@@ -435,15 +435,17 @@ if {[info exists uTOC]} {
 if {[string length $util]} {
     switch -exact -- $util {
 	ids {
-	    mk::file open xdb $twikidb -readonly
-	    foreach page [mk::select xdb.pages] {
+	    tdbc::sqlite3::connection create db $twikidb
+	    set stmt [db prepare {SELECT a.id, a.date, b.content, a.name FROM pages a, pages_content b WHERE a.id = b.id}]
+	    $stmt foreach -as dicts d {
 		puts [list \
-			  $page \
-			  [expr {([mk::get xdb.pages!$page date] > 0 && [string length [mk::get xdb.pages!$page page]] > 1) ? "ok" : "empty"}] \
-			  [mk::get xdb.pages!$page name]
+			  [dict get $d id] \
+			  [expr {([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty"}] \
+			  [dict get $d name]
 		     ]
 	    }
-	    mk::file close xdb
+	    $stmt close
+	    db close
 	    exit
 	}
 	html {
