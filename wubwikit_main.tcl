@@ -9,9 +9,6 @@ if {![catch {package require starkit}]} {
     }
 }
 
-package require tdbc
-package require tdbc::sqlite3
-
 set sql(count_pages) {
     SELECT COUNT(*) 
     FROM pages
@@ -449,6 +446,8 @@ if {![info exists twikidb]} {
 
 lappend auto_path [file join $kit_dir lib] [file join $kit_dir lib wikitcl] [file join $kit_dir lib wub]
 
+package require tdbc
+package require tdbc::sqlite3
 
 proc get_pages_html { } {
     global pages port opath page util_dir
