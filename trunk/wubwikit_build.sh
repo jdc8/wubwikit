@@ -34,6 +34,7 @@ cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d in
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d md5 -P tcllib/modules/md5
 
 # Optional: remove test and documentations file to keep size of .kit low
+cd ../..
 find . -name "CVS" | xargs rm -Rf
 find . -name "*.test" | xargs rm
 find . -name "*.testsuite" | xargs rm
@@ -44,25 +45,16 @@ find . -name "*.html" | xargs rm
 find . -name "ChangeLog" | xargs rm
 find . -name "*.[ch]" | xargs rm
 
-# Get gbutton
-mkdir gbutton-temp
-cd gbutton-temp
-#get http://mini.net/sdarchive/gbutton.kit
-cp ../../../gbutton.kit .
-sdx unwrap gbutton.kit
-mv gbutton.vfs/lib/gbutton ..
-cd ..
-rm -Rf gbutton-temp
-cd ../..
-
 # Copy/move some files
-cp gbutton-pkgIndex.tcl wubwikit.vfs/lib/gbutton/pkgIndex.tcl
 cp local.tcl wubwikit.vfs/lib/wikitcl/wubwikit/local.tcl
 cp vars.tcl wubwikit.vfs/lib/wikitcl/wubwikit/vars.tcl
 cp wikit.ini wubwikit.vfs/lib/wikitcl/wubwikit/wikit.ini
 cp wubwikit_main.tcl wubwikit.vfs/main.tcl
 cp welcome.html wubwikit.vfs/lib/wikitcl/wubwikit/docroot/html
 cp wikitoc.jpg wubwikit.vfs/lib/wikitcl/wubwikit/docroot/images
+mkdir -p wubwikit.vfs/lib/tdbc
+cp sqlite3-1.0b13.tm wubwikit.vfs/lib/tdbc
+cp tdbc_sqlite3_pkgIndex.tcl wubwikit.vfs/lib/tdbc/pkgIndex.tcl
 
 # Create starkit
 sdx wrap wubwikit.kit -writable
