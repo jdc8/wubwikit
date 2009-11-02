@@ -169,7 +169,7 @@ Options to customise your Wiki:
     page. When set to false, the file 'welcome.html' will be used as welcome
     page.
 
-  readonly <boolean>
+  readonly <message>
 
     Run the wiki in read-only mode
 
