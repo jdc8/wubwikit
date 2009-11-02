@@ -169,6 +169,18 @@ Options to customise your Wiki:
     page. When set to false, the file 'welcome.html' will be used as welcome
     page.
 
+  readonly <boolean>
+
+    Run the wiki in read-only mode
+
+  inline_html <boolean>
+
+    Allow use of Inline-html using the <<inlinehtml>> markup
+
+  include_pages <boolean>
+
+    Allow inclusion of other pages using the <<include: >> markup.
+
 Utilities:
 
   util ids
@@ -368,6 +380,9 @@ set util ""
 set page ""
 set pages ""
 set opath ""
+set inline_html 0
+set include_pages 0
+set readonly ""
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -377,7 +392,10 @@ foreach {key val} $iargv {
 	util -
 	page -
 	pages - 
-	opath {
+	opath -
+	readonly -
+	inline_html -
+	include_pages {
 	    set $key $val 
 	}
 	toc { 
@@ -585,6 +603,12 @@ nubdir=.
 [wikitwub]
 base=
 }
+close $f
+
+set f [open local.tcl w]
+puts $f "set ::WikitWub::inline_html $inline_html"
+puts $f "set ::WikitWub::include_pages $include_pages"
+puts $f "set ::WikitWub::readonly \{$readonly\}"
 close $f
 
 set ::starkit_wikittitle $ttitle
