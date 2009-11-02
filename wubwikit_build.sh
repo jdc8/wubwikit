@@ -34,16 +34,17 @@ cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d in
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d md5 -P tcllib/modules/md5
 
 # Optional: remove test and documentations file to keep size of .kit low
-cd ../..
+cd ..
 find . -name "CVS" | xargs rm -Rf
 find . -name "*.test" | xargs rm
 find . -name "*.testsuite" | xargs rm
 find . -name "*.testsupport" | xargs rm
 find . -name "*.man" | xargs rm
 find . -name "*.bench" | xargs rm
-find . -name "*.html" | xargs rm
+#find . -name "*.html" | xargs rm
 find . -name "ChangeLog" | xargs rm
 find . -name "*.[ch]" | xargs rm
+cd ..
 
 # Copy/move some files
 cp local.tcl wubwikit.vfs/lib/wikitcl/wubwikit/local.tcl
