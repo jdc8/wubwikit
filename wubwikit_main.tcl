@@ -67,26 +67,22 @@ set sql(references_from_other_pages) {
 proc help { } {
     puts {
 
-Usage as starkit:
-
-    % tclkit wubwikit<version>.kit <options>
-
-Usage as unwrapped starkit or unzippped archive:
+Usage of unzippped archive:
 
     % tclsh wubwikit<version>.vfs/main.tcl <options>
 
 Requirements:
 
-    - tclkit or tclsh based on Tcl/Tk 8.6
-    - package tdbc
-    - package tdbc::sqlite3
-    - package sqlite3
+    - tclsh based on Tcl/Tk 8.6
+    - package tdbc, part of Tcl/Tk 8.6
+    - package tdbc::sqlite3, include in archive
+    - package sqlite3 version 3.6.19
 
 Typical usage:
 
 - Create a new wiki database:
 
-    % tclkit wubwikit.kit mkdb mywiki title "My Wiki"
+    % tclsh wubwikit<version>.vfs/main.tcl mkdb mywiki title "My Wiki"
 
   This will create 2 files:
 
@@ -95,11 +91,11 @@ Typical usage:
 
 - Start a wiki:
 
-    % tclkit wubwikit.kit wikidb mywiki.tkd toc file:mywiki.toc welcomezero 1
+    % tclsh wubwikit<version>.vfs/main.tcl wikidb mywiki.tkd toc file:mywiki.toc welcomezero 1
 
 - Start a wiki with a copy of the Tcler's wiki database:
 
-    % tclkit wubwikit.kit wikidb wikit.tkd
+    % tclsh wubwikit<version>.vfs/main.tcl wikidb wikit.tkd
 
 Basic options:
  
