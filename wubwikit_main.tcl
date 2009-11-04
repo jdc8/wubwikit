@@ -62,7 +62,7 @@ set sql(pages_content) {
 }
 
 set help(non_empty_pages) {
-    Print list non-empty pages (content size > 1).
+    Print list of non-empty pages (content size > 1).
 
     Print one line per page with id and page title to standard output. The
     resulting output can be used as input for the [util html|markup] commands
@@ -76,7 +76,7 @@ set sql(non_empty_pages) {
 
 
 set help(empty_pages) {
-    Print list empty pages (content size <= 1).
+    Print list of empty pages (content size <= 1).
 
     Print one line per page with id and page title to standard output. The
     resulting output can be used as input for the [util html|markup] commands
@@ -226,6 +226,10 @@ Options to customise your Wiki:
     page.
 
   readonly <message>
+
+    Run the wiki in read-only mode
+
+  hidereadonly <boolean>
 
     Run the wiki in read-only mode
 
@@ -452,6 +456,7 @@ set opath ""
 set inline_html 0
 set include_pages 0
 set readonly ""
+set hidereadonly 0
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -463,6 +468,7 @@ foreach {key val} $iargv {
 	pages - 
 	opath -
 	readonly -
+	hidereadonly -
 	inline_html -
 	include_pages {
 	    set $key $val 
@@ -711,6 +717,7 @@ close $f
 
 set ::starkit_wikittitle $ttitle
 set ::starkit_welcomezero $welcomezero
+set ::starkit_hidereadonly $hidereadonly
 if {[string length $url]} {
     set ::starkit_url $url
 }
