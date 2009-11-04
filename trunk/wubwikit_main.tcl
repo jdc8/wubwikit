@@ -9,11 +9,17 @@ if {![catch {package require starkit}]} {
     }
 }
 
+set help(count_pages) {
+    Count all pages.
+}
 set sql(count_pages) {
     SELECT COUNT(*) 
     FROM pages
 }
 
+set help(count_empty_pages) {
+    Count all empty pages (content size <= 1).
+}
 set sql(count_empty_pages) {
     SELECT COUNT(*) 
     FROM pages a, pages_content b 
@@ -21,6 +27,12 @@ set sql(count_empty_pages) {
     AND length(b.content) < 2
 }
 
+set help(non_empty_pages_without_references_to_others) {
+    Print list of non-empty pages without any references to other pages.
+
+    Print one line per page with id and page title to standard output. The
+    resulting output can be used as input for the [util html|markup] commands
+}
 set sql(non_empty_pages_without_references_to_others) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
@@ -29,6 +41,12 @@ set sql(non_empty_pages_without_references_to_others) {
     AND a.id NOT IN (SELECT fromid FROM refs)
 }
 
+set help(non_empty_pages_unreferenced_by_others) {
+    Print list of non-empty pages not referenced by any other pages.
+
+    Print one line per page with id and page title to standard output. The
+    resulting output can be used as input for the [util html|markup] commands
+}
 set sql(non_empty_pages_unreferenced_by_others) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
@@ -40,9 +58,15 @@ set sql(non_empty_pages_unreferenced_by_others) {
 set sql(pages_content) {
     SELECT id, content
     FROM pages_content
-    WHERE length(content) > 1
+    WHERE id = :page
 }
 
+set help(non_empty_pages) {
+    Print list non-empty pages (content size > 1).
+
+    Print one line per page with id and page title to standard output. The
+    resulting output can be used as input for the [util html|markup] commands
+}
 set sql(non_empty_pages) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
@@ -50,18 +74,54 @@ set sql(non_empty_pages) {
     AND length(b.content) > 1 
 }
 
-set sql(references_to_other_pages) {
-    SELECT a.id, a.name, b.toid
-    FROM pages a, refs b
-    WHERE a.id = b.toid
-    ORDER BY a.id, b.toid
+
+set help(empty_pages) {
+    Print list empty pages (content size <= 1).
+
+    Print one line per page with id and page title to standard output. The
+    resulting output can be used as input for the [util html|markup] commands
+}
+set sql(empty_pages) {
+    SELECT a.id, a.name 
+    FROM pages a, pages_content b 
+    WHERE a.id = b.id 
+    AND length(b.content) <= 1 
 }
 
-set sql(references_from_other_pages) {
-    SELECT a.id, a.name, b.fromid
+set help(references_to_other_pages) {
+    Print references found in specified pages to other pages.
+
+    Print one line per page with to-id, from-id and page title to standard output. The
+    resulting output can be used as input for the [util html|markup] commands
+}
+set util_args(references_to_other_pages) "?page <page-id>? ?pages <file>?"
+set sql(references_to_other_pages) {
+    SELECT a.id, b.fromid, a.name
     FROM pages a, refs b
     WHERE a.id = b.toid
-    ORDER BY a.id, b.fromid
+    AND b.fromid = :page
+    ORDER BY a.id
+}
+
+set help(references_from_other_pages) {
+    Print references from other pages to specified pages.
+
+    Print one line per page with from-id, to-id and page title to standard output. The
+    resulting output can be used as input for the [util html|markup] commands
+}
+set util_args(references_from_other_pages) "?page <page-id>? ?pages <file>?"
+set sql(references_from_other_pages) {
+    SELECT a.id, b.toid, a.name
+    FROM pages a, refs b
+    WHERE a.id = b.fromid
+    AND b.toid = :page
+    ORDER BY a.id
+}
+
+set sql(ids) {
+    SELECT a.id, a.date, b.content, a.name 
+    FROM pages a, pages_content b 
+    WHERE a.id = b.id
 }
 
 proc help { } {
@@ -182,21 +242,34 @@ Utilities:
   util ids
 
     Print one line per page with page-id, indication if ok or empty and page
-    title to standard output.
+    title to standard output. The resulting output can be used as input for the
+    [util html|markup] commands
 
-  util html page <page-id> ?opath <path>?
+  util html|markup page <page-id> ?opath <path>?
 
-    Print html for specified page to file <opath>/<page-id>.html
+    Print html|markup for specified page to file <opath>/<page-id>.html|txt
 
-  util html pages <file> ?opath <path>?
+  util html|markup pages <file> ?opath <path>?
 
-    Print html for each page specified with its <page-id> in <file> to file
-    <opath>/<page-id>.html. Puts each page-id as a separate line in <file>. The
-    output of the util ids command can be used as input for this command.
-} 
+    Print html|markup for each page specified with its <page-id> in <file> to
+    file <opath>/<page-id>.html|txt. Put each page-id as first item on a
+    separate line in <file>. The output of other util commands can be used as
+    input for this command.
+}
 
 foreach k [lsort -dictionary [array names ::sql]] {
-    puts "  util $k\n"
+    if {$k ni {ids pages_content}} {
+	puts -nonewline "  util $k"
+	if {[info exists ::util_args($k)]} {
+	    puts -nonewline " $::util_args($k)"
+	}
+	puts ""
+	if {[info exists ::help($k)]} {
+	    puts $::help($k)
+	} else {
+	    puts ""
+	}
+    }
 }
 
 }
@@ -463,6 +536,24 @@ lappend auto_path [file join $kit_dir lib] [file join $kit_dir lib wikitcl] [fil
 package require tdbc
 package require tdbc::sqlite3
 
+proc get_pages { } {
+    global page pages util_dir
+    set pl {}
+    if {[string length $pages]} {
+	set f [open [file join $util_dir $pages] r]
+	foreach l [split [read $f] \n] {
+	    set l [string trim $l]
+	    if {[string length $l]} {
+		lappend pl [lindex $l 0]
+	    }
+	}
+    }
+    if {[string length $page]} {
+	lappend pl {*}$page
+    }
+    return $pl
+}
+
 proc get_pages_html { } {
     global pages port opath page util_dir
     if {[catch {socket localhost $port} msg]} {
@@ -471,31 +562,64 @@ proc get_pages_html { } {
 	return
     }
     package require http
-    if {[string length $pages]} {
-	set f [open [file join $util_dir $pages] r]
-	foreach l [split [read $f] \n] {
-	    set l [string trim $l]
-	    if {[string length $l]} {
-		puts "Get page $page"
-		set page [lindex $l 0]
-		set tkn [http::geturl http://localhost:$port/$page]
-		set o [open [file join $util_dir $opath $page.html] w]
-		puts $o [http::data $tkn]
-		close $o
-		http::cleanup $tkn
-	    }
-	}
-	close $f
-    } 
-    if {[string length $page]} {
-	puts "Get page $page"
+    foreach page [get_pages] {
+	set fnm [file join $util_dir $opath $page.html]
+	puts [list $page $fnm]
 	set tkn [http::geturl http://localhost:$port/$page]
-	set o [open [file join $util_dir $opath $page.html] w]
+	set o [open $fnm w]
 	puts $o [http::data $tkn]
 	close $o
 	http::cleanup $tkn
     }
     exit
+}
+
+proc get_pages_markup { } {
+    global sql pages opath page util_dir
+    foreach page [get_pages] {
+	set fnm [file join $util_dir $opath $page.txt]
+	puts [list $page $fnm]
+	set o [open $fnm w]
+	set stmt [db prepare $sql(pages_content)]
+	$stmt foreach -as dicts d {
+	    puts -nonewline $o [dict get $d content]
+	}
+	$stmt close
+	close $o
+    }
+}
+
+proc get_ids { } {
+    global sql util
+    set stmt [db prepare $sql($util)]
+    $stmt foreach -as dicts d {
+	puts [list \
+		  [dict get $d id] \
+		  [expr {([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty"}] \
+		  [dict get $d name]
+	     ]
+    }
+    $stmt close
+}
+
+proc get_sql_pages { } {
+    global sql util
+    foreach page [get_pages] {
+	set stmt [db prepare $sql($util)]
+	$stmt foreach -as lists d {
+	    puts $d
+	}
+    }
+    $stmt close
+}
+
+proc get_sql { } {
+    global sql util
+    set stmt [db prepare $sql($util)]
+    $stmt foreach -as lists d {
+	puts $d
+    }
+    $stmt close
 }
 
 if {[info exists uTOC]} {
@@ -506,40 +630,18 @@ if {[info exists uTOC]} {
 }
 
 if {[string length $util]} {
+    set util_dir [pwd]
     if {$util eq "html"} {
 	set wub 1
-	set util_dir [pwd]
 	get_pages_html
     } else {
 	tdbc::sqlite3::connection create db $twikidb
 	switch -exact -- $util {
-	    ids {
-		set stmt [db prepare {SELECT a.id, a.date, b.content, a.name FROM pages a, pages_content b WHERE a.id = b.id}]
-		$stmt foreach -as dicts d {
-		    puts [list \
-			      [dict get $d id] \
-			      [expr {([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty"}] \
-			      [dict get $d name]
-			 ]
-		}
-		$stmt close
-	    }
-	    pages {
-		set stmt [db prepare $sql($util)]
-		$stmt foreach -as dicts d {
-		    set f [open [dict get $d id].txt w]
-		    puts $f [dict get $d content]
-		    close $f
-		}
-		$stmt close
-	    }
-	    default {
-		set stmt [db prepare $sql($util)]
-		$stmt foreach -as dicts d {
-		    puts $d
-		}
-		$stmt close
-	    }
+	    ids { get_ids }
+	    markup { get_pages_markup }
+	    references_to_other_pages -
+	    references_from_other_pages { get_sql_pages }
+	    default { get_sql }
 	}
 	db close
 	exit
