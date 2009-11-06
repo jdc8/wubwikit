@@ -241,6 +241,8 @@ Options to customise your Wiki:
 
     Allow inclusion of other pages using the <<include: >> markup.
 
+  markup_language <wikit|stx>
+
 Utilities:
 
   util ids
@@ -445,7 +447,7 @@ if {[info exists ::env(TEMP)]} {
 set welcome_file ""
 set welcomezero 0
 set image_files {}
-set ttitle "Welcome to the Tclers Wiki starkit!"
+set title "Welcome to the Tclers Wiki starkit!"
 set mkdb 0
 set dbfilename ""
 set url ""
@@ -457,6 +459,7 @@ set inline_html 0
 set include_pages 0
 set readonly ""
 set hidereadonly 0
+set markup_language "wikit"
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -470,7 +473,10 @@ foreach {key val} $iargv {
 	readonly -
 	hidereadonly -
 	inline_html -
-	include_pages {
+	include_pages -
+	markup_language -
+	title -
+	welcomezero {
 	    set $key $val 
 	}
 	toc { 
@@ -505,14 +511,8 @@ foreach {key val} $iargv {
 	welcome {
 	    set welcome_file [file normalize $val]
 	}
-	welcomezero {
-	    set welcomezero $val
-	}
 	image {
 	    lappend image_files [file normalize $val]
-	}
-	title {
-	    set ttitle $val
 	}
 	help {
 	    help
@@ -529,7 +529,7 @@ foreach {key val} $iargv {
 }
 
 if {$mkdb} {
-    mkdb $dbfilename $ttitle
+    mkdb $dbfilename $title
     exit
 }
 
@@ -713,9 +713,10 @@ set f [open local.tcl w]
 puts $f "set ::WikitWub::inline_html $inline_html"
 puts $f "set ::WikitWub::include_pages $include_pages"
 puts $f "set ::WikitWub::readonly \{$readonly\}"
+puts $f "set ::WikitWub::markup_language $markup_language"
 close $f
 
-set ::starkit_wikittitle $ttitle
+set ::starkit_wikittitle $title
 set ::starkit_welcomezero $welcomezero
 set ::starkit_hidereadonly $hidereadonly
 if {[string length $url]} {
