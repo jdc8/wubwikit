@@ -54,6 +54,8 @@ cp wubwikit_main.tcl wubwikit.vfs/main.tcl
 cp welcome.html wubwikit.vfs/lib/wikitcl/wubwikit/docroot/html
 cp wikitoc.jpg wubwikit.vfs/lib/wikitcl/wubwikit/docroot/images
 mkdir -p wubwikit.vfs/lib/tdbc
+
+# Get tdbc::sqlite3 from tdbc.tcl.tk manually
 cp sqlite3-1.0b13.tm wubwikit.vfs/lib/tdbc
 cp tdbc_sqlite3_pkgIndex.tcl wubwikit.vfs/lib/tdbc/pkgIndex.tcl
 
