@@ -241,7 +241,7 @@ Options to customise your Wiki:
 
     Allow inclusion of other pages using the <<include: >> markup.
 
-  markup_language <wikit|stx>
+  markup_language <wikit|stx|creole>
 
 Utilities:
 
@@ -280,13 +280,6 @@ foreach k [lsort -dictionary [array names ::sql]] {
 
 }
 
-proc mkdb_exec {sql} {
-    set stmt [db prepare $sql]
-    set rs [uplevel $stmt execute]
-    $rs close
-    $stmt close
-}
-
 proc mkdb { fnm title } { 
 
     if {[file exists $fnm.tkd]} {
@@ -298,21 +291,21 @@ proc mkdb { fnm title } {
     }
 
     tdbc::sqlite3::connection create db $fnm.tkd
-    mkdb_exec {PRAGMA foreign_keys = ON}
-    mkdb_exec { 
+    db allrows {PRAGMA foreign_keys = ON}
+    db allrows { 
 	CREATE TABLE pages (id INT NOT NULL,
 			    name TEXT NOT NULL,
 			    date INT NOT NULL,
 			    who TEXT NOT NULL,
 			    PRIMARY KEY (id))
     }
-    mkdb_exec { 
+    db allrows { 
 	CREATE TABLE pages_content (id INT NOT NULL,
 				    content TEXT NOT NULL,
 				    PRIMARY KEY (id),
 				    FOREIGN KEY (id) REFERENCES pages(id))
     }
-    mkdb_exec {
+    db allrows {
 	CREATE TABLE changes (id INT NOT NULL,
 			      cid INT NOT NULL,
 			      date INT NOT NULL,
@@ -321,7 +314,7 @@ proc mkdb { fnm title } {
 			      PRIMARY KEY (id, cid),
 			      FOREIGN KEY (id) REFERENCES pages(id))
     }
-    mkdb_exec {
+    db allrows {
 	CREATE TABLE diffs (id INT NOT NULL,
 			    cid INT NOT NULL,
 			    did INT NOT NULL,
@@ -331,14 +324,14 @@ proc mkdb { fnm title } {
 			    PRIMARY KEY (id, cid, did),
 			    FOREIGN KEY (id, cid) REFERENCES changes(id, cid))
     }
-    mkdb_exec {
+    db allrows {
 	CREATE TABLE refs (fromid INT NOT NULL,
 			   toid INT NOT NULL,
 			   PRIMARY KEY (fromid, toid),
 			   FOREIGN KEY (fromid) references pages(id),
 			   FOREIGN KEY (toid) references pages(id))
     }
-    mkdb_exec {CREATE INDEX refs_toid_index ON refs (toid)}
+    db allrows {CREATE INDEX refs_toid_index ON refs (toid)}
     set date [clock seconds]
     set who "init"
 
@@ -346,14 +339,14 @@ proc mkdb { fnm title } {
     set names [list $title                  "Page 1"    "Search"      "Help"                                        "Recent Changes"]
     set pages [list "Your Wiki starts here!" "Not used." "Generated." "Your wiki help and formatting rules go here." "Generated."]
     foreach id $ids name $names page $pages {
-	mkdb_exec {INSERT INTO pages (id, name, date, who) VALUES (:id, :name, :date, :who)}
-	mkdb_exec {INSERT INTO pages_content (id, content) VALUES (:id, :page)}
+	db allrows {INSERT INTO pages (id, name, date, who) VALUES (:id, :name, :date, :who)}
+	db allrows {INSERT INTO pages_content (id, content) VALUES (:id, :page)}
     }
     foreach id {5 6 7 8 9} {
 	set name "Page $id"
 	set page "Not used."
-	mkdb_exec {INSERT INTO pages (id, name, date, who) VALUES (:id, :name, :date, :who)}
-	mkdb_exec {INSERT INTO pages_content (id, content) VALUES (:id, :page)}
+	db allrows {INSERT INTO pages (id, name, date, who) VALUES (:id, :name, :date, :who)}
+	db allrows {INSERT INTO pages_content (id, content) VALUES (:id, :page)}
     }
 
     db close
@@ -528,6 +521,11 @@ foreach {key val} $iargv {
     }
 }
 
+lappend auto_path [file join $kit_dir lib] [file join $kit_dir lib wikitcl] [file join $kit_dir lib wub]
+
+package require tdbc
+package require tdbc::sqlite3
+
 if {$mkdb} {
     mkdb $dbfilename $title
     exit
@@ -536,11 +534,6 @@ if {$mkdb} {
 if {![info exists twikidb]} {
     error "No wiki database specified, use 'wikidb <file>' option to specify a wiki data base."
 }
-
-lappend auto_path [file join $kit_dir lib] [file join $kit_dir lib wikitcl] [file join $kit_dir lib wub]
-
-package require tdbc
-package require tdbc::sqlite3
 
 proc get_pages { } {
     global page pages util_dir
@@ -586,46 +579,38 @@ proc get_pages_markup { } {
 	set fnm [file join $util_dir $opath $page.txt]
 	puts [list $page $fnm]
 	set o [open $fnm w]
-	set stmt [db prepare $sql(pages_content)]
-	$stmt foreach -as dicts d {
+	db foreach -as dicts $sql(pages_content) d {
 	    puts -nonewline $o [dict get $d content]
 	}
-	$stmt close
 	close $o
     }
 }
 
 proc get_ids { } {
     global sql util
-    set stmt [db prepare $sql($util)]
-    $stmt foreach -as dicts d {
+    db foreach -as dict $sql($util)] d {
 	puts [list \
 		  [dict get $d id] \
 		  [expr {([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty"}] \
 		  [dict get $d name]
 	     ]
     }
-    $stmt close
 }
 
 proc get_sql_pages { } {
     global sql util
     foreach page [get_pages] {
-	set stmt [db prepare $sql($util)]
-	$stmt foreach -as lists d {
+	db foreach -as lists $sql($util) d {
 	    puts $d
 	}
     }
-    $stmt close
 }
 
 proc get_sql { } {
     global sql util
-    set stmt [db prepare $sql($util)]
-    $stmt foreach -as lists d {
+    db foreach -as lists $sql($util) d {
 	puts $d
     }
-    $stmt close
 }
 
 if {[info exists uTOC]} {
