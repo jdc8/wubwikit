@@ -17,23 +17,66 @@ set sql(count_pages) {
     FROM pages
 }
 
-set help(count_empty_pages) {
-    Count all empty pages (content size <= 1).
+set help(count_text_pages) {
+    Count all image pages.
 }
-set sql(count_empty_pages) {
+set sql(count_text_pages) {
+    SELECT COUNT(*) 
+    FROM pages 
+    WHERE type GLOB "text/*" 
+    OR type is NULL
+}
+
+set help(count_image_pages) {
+    Count all image pages.
+}
+set sql(count_image_pages) {
+    SELECT COUNT(*) 
+    FROM pages a
+    WHERE NOT type GLOB "text/*"
+    AND NOT type is NULL
+}
+
+set help(count_empty_text_pages) {
+    Count all empty text pages (content size <= 1).
+}
+set sql(count_empty_text_pages) {
     SELECT COUNT(*) 
     FROM pages a, pages_content b 
     WHERE a.id = b.id 
     AND length(b.content) < 2
 }
 
-set help(non_empty_pages_without_references_to_others) {
-    Print list of non-empty pages without any references to other pages.
-
-    Print one line per page with id and page title to standard output. The
-    resulting output can be used as input for the [util html|markup] commands
+set help(count_non_empty_text_pages) {
+    Count all non empty text pages (content size > 1).
 }
-set sql(non_empty_pages_without_references_to_others) {
+set sql(count_non_empty_text_pages) {
+    SELECT COUNT(*) 
+    FROM pages a, pages_content b 
+    WHERE a.id = b.id 
+    AND length(b.content) > 1
+}
+
+set help(count_pages_without_content) {
+    Count without content. This are pages which have a title but
+    haven't got content yet, not even content with size < 1.
+}
+set sql(count_pages_without_content) {
+    SELECT COUNT(*)
+    FROM pages
+    WHERE id NOT IN (SELECT id FROM pages_content)
+    AND id NOT IN (SELECT id FROM pages_binary)
+}
+
+set help(line_per_page) {
+    Print one line per page with id and page title to standard output. The
+    resulting output can be used as input for the [util html|markup] commands.
+}
+
+set help(non_empty_text_pages_without_references_to_others) "
+    Print list of non-empty text pages without any references to other pages.
+$help(line_per_page)"
+set sql(non_empty_text_pages_without_references_to_others) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
     WHERE a.id = b.id 
@@ -41,17 +84,24 @@ set sql(non_empty_pages_without_references_to_others) {
     AND a.id NOT IN (SELECT fromid FROM refs)
 }
 
-set help(non_empty_pages_unreferenced_by_others) {
-    Print list of non-empty pages not referenced by any other pages.
-
-    Print one line per page with id and page title to standard output. The
-    resulting output can be used as input for the [util html|markup] commands
-}
-set sql(non_empty_pages_unreferenced_by_others) {
+set help(non_empty_text_pages_unreferenced_by_others) "
+    Print list of non-empty text pages not referenced by any other pages.
+$help(line_per_page)"
+set sql(non_empty_text_pages_unreferenced_by_others) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
     WHERE a.id = b.id 
     AND length(b.content) > 1 
+    AND a.id NOT IN (SELECT toid FROM refs)
+}
+
+set help(image_pages_unreferenced_by_others) "
+    Print list of image pages not referenced by any other pages.
+$help(line_per_page)"
+set sql(image_pages_unreferenced_by_others) {
+    SELECT a.id, a.name 
+    FROM pages a, pages_binary b 
+    WHERE a.id = b.id 
     AND a.id NOT IN (SELECT toid FROM refs)
 }
 
@@ -61,39 +111,49 @@ set sql(pages_content) {
     WHERE id = :page
 }
 
-set help(non_empty_pages) {
-    Print list of non-empty pages (content size > 1).
-
-    Print one line per page with id and page title to standard output. The
-    resulting output can be used as input for the [util html|markup] commands
-}
-set sql(non_empty_pages) {
+set help(non_empty_text_pages) "
+    Print list of non-empty text pages (content size > 1).
+$help(line_per_page)"
+set sql(non_empty_text_pages) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
     WHERE a.id = b.id 
     AND length(b.content) > 1 
 }
 
-
-set help(empty_pages) {
-    Print list of empty pages (content size <= 1).
-
-    Print one line per page with id and page title to standard output. The
-    resulting output can be used as input for the [util html|markup] commands
+set help(image_pages) "
+    Print list of image text pages.
+$help(line_per_page)"
+set sql(image_pages) {
+    SELECT a.id, a.name 
+    FROM pages a, pages_binary b 
+    WHERE a.id = b.id 
 }
-set sql(empty_pages) {
+
+set help(empty_text_pages) "
+    Print list of empty text pages (content size <= 1).
+$help(line_per_page)"
+set sql(empty_text_pages) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
     WHERE a.id = b.id 
     AND length(b.content) <= 1 
 }
 
-set help(references_to_other_pages) {
-    Print references found in specified pages to other pages.
-
-    Print one line per page with to-id, from-id and page title to standard output. The
-    resulting output can be used as input for the [util html|markup] commands
+set help(pages_without_content) "
+    Print list of pages without content. This are pages which have a title but
+    haven't got content yet, not even content with size < 1.
+$help(line_per_page)"
+set sql(pages_without_content) {
+    SELECT id, name
+    FROM pages
+    WHERE id NOT IN (SELECT id FROM pages_content)
+    AND id NOT IN (SELECT id FROM pages_binary)
 }
+
+set help(references_to_other_pages) "
+    Print references found in specified pages to other pages.
+$help(line_per_page)"
 set util_args(references_to_other_pages) "?page <page-id>? ?pages <file>?"
 set sql(references_to_other_pages) {
     SELECT a.id, b.fromid, a.name
@@ -103,12 +163,9 @@ set sql(references_to_other_pages) {
     ORDER BY a.id
 }
 
-set help(references_from_other_pages) {
+set help(references_from_other_pages) "
     Print references from other pages to specified pages.
-
-    Print one line per page with from-id, to-id and page title to standard output. The
-    resulting output can be used as input for the [util html|markup] commands
-}
+$help(line_per_page)"
 set util_args(references_from_other_pages) "?page <page-id>? ?pages <file>?"
 set sql(references_from_other_pages) {
     SELECT a.id, b.toid, a.name
@@ -541,7 +598,7 @@ proc get_sql { } {
     global sql util
     set stmt [db prepare $sql($util)]
     $stmt foreach -as lists l {
-	puts $l
+	puts [string map {\n \\n} $l]
     }
     $stmt close
 }
