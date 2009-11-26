@@ -142,16 +142,13 @@ Typical usage:
 
 - Create a new wiki database:
 
-    % tclsh wubwikit<version>.vfs/main.tcl mkdb mywiki title "My Wiki"
+    % tclsh wubwikit<version>.vfs/main.tcl mkdb mywiki.tkd title "My Wiki"
 
-  This will create 2 files:
-
-      mywiki.tkd      A new wiki database
-      mywiki.toc      A new wiki table of contents
+  This will create a new wiki database
 
 - Start a wiki:
 
-    % tclsh wubwikit<version>.vfs/main.tcl wikidb mywiki.tkd toc file:mywiki.toc welcomezero 1
+    % tclsh wubwikit<version>.vfs/main.tcl wikidb mywiki.tkd
 
 - Start a wiki with a copy of the Tcler's wiki database:
 
@@ -163,19 +160,17 @@ Basic options:
 
     Show this message
 
-  wikidb <path>                         
+  wikidb <file>                         
 
     Set path to Wiki database. Mandatory!
 
-  mkdb <path> 
+  mkdb <file> title <title>
 
-    Create empty Wiki database and TOC file.
+    Create empty Wiki database.
 
-Options to set Table Of Contents (TOC):
+  mklocal <path> 
 
-  toc file:<path>                       
-
-    Use the contents of the specified file as table of contents.
+    Create default Wiki 'local.tcl' to configure your Wiki.
 
 Options for Wub:
 
@@ -192,56 +187,9 @@ Options for Wub:
 
     Set name of log file
 
-Options to customise your Wiki:
+  local <file>
 
-  edit_template file:<path>
-  edit_template <text>
-
-    Set text to be used when editing a page for the first time.    
-
-  image <file>                          
-
-    Specify name of image to be added to the wiki. Special image names used in
-    the wiki:
-
-        favicon.ico      The favicon
-        plume.png        The plume shown top-right, with background color #CCC
-
-  title <text>                          
-
-    Set title to be used on welcome page when the welcome page is base on welcome.html
-
-  url <text>
-
-    Set url of the website (specify without leading http://)
-
-  welcome <file>                        
-
-    Specify html file to be used as welcome page
-
-  welcomezero <boolean>
-
-    When set to true, page 0 from the database will be used as welcome
-    page. When set to false, the file 'welcome.html' will be used as welcome
-    page.
-
-  readonly <message>
-
-    Run the wiki in read-only mode
-
-  hidereadonly <boolean>
-
-    Run the wiki in read-only mode
-
-  inline_html <boolean>
-
-    Allow use of Inline-html using the <<inlinehtml>> markup
-
-  include_pages <boolean>
-
-    Allow inclusion of other pages using the <<include: >> markup.
-
-  markup_language <wikit|stx|creole>
+    Wiki config file to be used for your wiki.
 
 Utilities:
 
@@ -282,21 +230,18 @@ foreach k [lsort -dictionary [array names ::sql]] {
 
 proc mkdb { fnm title } { 
 
-    if {[file exists $fnm.tkd]} {
-	error "Database '$fnm.tkd' already exists"
+    if {[file exists $fnm]} {
+	error "Database '$fnm' already exists"
     }
 
-    if {[file exists $fnm.toc]} {
-	error "Table of contents '$fnm.toc' already exists"
-    }
-
-    tdbc::sqlite3::connection create db $fnm.tkd
+    tdbc::sqlite3::connection create db $fnm
     db allrows {PRAGMA foreign_keys = ON}
     db allrows { 
 	CREATE TABLE pages (id INT NOT NULL,
 			    name TEXT NOT NULL,
 			    date INT NOT NULL,
 			    who TEXT NOT NULL,
+                            type TEXT,
 			    PRIMARY KEY (id))
     }
     db allrows { 
@@ -313,6 +258,12 @@ proc mkdb { fnm title } {
 			      delta TEXT NOT NULL,
 			      PRIMARY KEY (id, cid),
 			      FOREIGN KEY (id) REFERENCES pages(id))
+    }
+    db allrows {
+	CREATE TABLE pages_binary (id INT NOT NULL,
+				   content BLOB NOT NULL,
+				   PRIMARY KEY (id),
+				   FOREIGN KEY (id) REFERENCES pages(id))
     }
     db allrows {
 	CREATE TABLE diffs (id INT NOT NULL,
@@ -334,27 +285,22 @@ proc mkdb { fnm title } {
     db allrows {CREATE INDEX refs_toid_index ON refs (toid)}
     set date [clock seconds]
     set who "init"
-
-    set ids   [list 0                        1           2             3                                             4]
-    set names [list $title                  "Page 1"    "Search"      "Help"                                        "Recent Changes"]
-    set pages [list "Your Wiki starts here!" "Not used." "Generated." "Your wiki help and formatting rules go here." "Generated."]
+    
+    set ids   [list 0                        1                     2           3]
+    set names [list $title                   "ADMIN:Welcome"       "ADMIN:TOC" "Help"]
+    set pages [list "Your Wiki starts here!" "Welcome page (html)" ""          "Add help for your wiki here"]
     foreach id $ids name $names page $pages {
 	db allrows {INSERT INTO pages (id, name, date, who) VALUES (:id, :name, :date, :who)}
 	db allrows {INSERT INTO pages_content (id, content) VALUES (:id, :page)}
     }
-    foreach id {5 6 7 8 9} {
-	set name "Page $id"
-	set page "Not used."
-	db allrows {INSERT INTO pages (id, name, date, who) VALUES (:id, :name, :date, :who)}
-	db allrows {INSERT INTO pages_content (id, content) VALUES (:id, :page)}
-    }
-
     db close
+}
 
-    set f [open $fnm.toc w]
-    close $f
-    
-    puts "Start wubwikit with these options:\n\n    wikidb $fnm.tkd toc file:$fnm.toc welcomezero 1\n"
+proc mklocal {fnm} {
+    if {[file exists $fnm]} {
+	error "Config file '$fnm' already exists"
+    }
+    file copy $::kit_dir/deflocal.tcl $fnm
 }
 
 # from "Invoking browsers" in the wiki
@@ -437,22 +383,15 @@ if {[info exists ::env(TEMP)]} {
 } else {
     set logfile /tmp/wikit.log
 }
-set welcome_file ""
-set welcomezero 0
 set image_files {}
-set title "Welcome to the Tclers Wiki starkit!"
 set mkdb 0
+set mklocal 0
 set dbfilename ""
-set url ""
 set util ""
 set page ""
 set pages ""
 set opath ""
-set inline_html 0
-set include_pages 0
-set readonly ""
-set hidereadonly 0
-set markup_language "wikit"
+set local ""
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -462,34 +401,9 @@ foreach {key val} $iargv {
 	util -
 	page -
 	pages - 
-	opath -
-	readonly -
-	hidereadonly -
-	inline_html -
-	include_pages -
-	markup_language -
 	title -
-	welcomezero {
+	opath {
 	    set $key $val 
-	}
-	toc { 
-	    if { [string match "file:*" $val] } {
-		set fnm [string range $val 5 end]
-	    } elseif {$val eq "wub"} {
-		set fnm [file join $kit_dir lib/wikitcl/wubwikit/docroot TOC]
-	    }
-	    set f [open $fnm r]
-	    set uTOC [read $f]
-	    close $f
-	}
-	edit_template { 
-	    if { [string match "file:*" $val] } {
-		set fnm [string range $val 5 end]
-		set f [open $fnm r]
-		set val [read $f]
-		close $f
-	    }
-	    set ::starkit_edit_template $val
 	}
 	wikidb {
 	    set val [file normalize $val]
@@ -501,11 +415,11 @@ foreach {key val} $iargv {
 	    lappend argv $key $val
 	    set logfile $val
 	}
-	welcome {
-	    set welcome_file [file normalize $val]
-	}
 	image {
 	    lappend image_files [file normalize $val]
+	}
+	local {
+	    set local [file normalize $val]
 	}
 	help {
 	    help
@@ -514,6 +428,12 @@ foreach {key val} $iargv {
 	mkdb {
 	    set mkdb 1
 	    set dbfilename $val
+	}
+	mklocal {
+	    set mklocal 1
+	    set localfilename $val
+	}
+	mklocal {
 	}
 	default {
 	    lappend argv $key $val
@@ -528,6 +448,11 @@ package require tdbc::sqlite3
 
 if {$mkdb} {
     mkdb $dbfilename $title
+    exit
+}
+
+if {$mklocal} {
+    mklocal $localfilename
     exit
 }
 
@@ -575,49 +500,50 @@ proc get_pages_html { } {
 
 proc get_pages_markup { } {
     global sql pages opath page util_dir
+    set stmt [db prepare $sql(pages_content)]
     foreach page [get_pages] {
 	set fnm [file join $util_dir $opath $page.txt]
 	puts [list $page $fnm]
 	set o [open $fnm w]
-	db foreach -as dicts $sql(pages_content) d {
+	$stmt foreach -as dicts d {
 	    puts -nonewline $o [dict get $d content]
 	}
 	close $o
     }
+    $stmt close
 }
 
 proc get_ids { } {
     global sql util
-    db foreach -as dict $sql($util)] d {
+    set stmt [db prepare $sql($util)]
+    $stmt foreach -as dicts d {
 	puts [list \
 		  [dict get $d id] \
 		  [expr {([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty"}] \
 		  [dict get $d name]
 	     ]
     }
+    $stmt close
 }
 
 proc get_sql_pages { } {
     global sql util
+    set stmt [db prepare $sql($util)]
     foreach page [get_pages] {
-	db foreach -as lists $sql($util) d {
+	$stmt foreach -as lists d {
 	    puts $d
 	}
     }
+    $stmt close
 }
 
 proc get_sql { } {
     global sql util
-    db foreach -as lists $sql($util) d {
-	puts $d
+    set stmt [db prepare $sql($util)]
+    $stmt foreach -as lists l {
+	puts $l
     }
-}
-
-if {[info exists uTOC]} {
-    set fnm [file join $kit_dir lib/wikitcl/wubwikit/docroot TOC]
-    set f [open $fnm w]
-    puts $f $uTOC
-    close $f
+    $stmt close
 }
 
 if {[string length $util]} {
@@ -689,33 +615,20 @@ host=localhost
 nubs=wikit.nub
 nubdir=.
 
-[wikitwub]
+[WikitWub]
 base=
 }
+
 close $f
 
-set f [open local.tcl w]
-puts $f "set ::WikitWub::inline_html $inline_html"
-puts $f "set ::WikitWub::include_pages $include_pages"
-puts $f "set ::WikitWub::readonly \{$readonly\}"
-puts $f "set ::WikitWub::markup_language $markup_language"
-close $f
-
-set ::starkit_wikittitle $title
-set ::starkit_welcomezero $welcomezero
-set ::starkit_hidereadonly $hidereadonly
-if {[string length $url]} {
-    set ::starkit_url $url
-}
-
-set ::starkit_wikitdbpath $twikidb
-
-if {[string length $welcome_file]} {
-    file copy -force $welcome_file [file join $kit_dir lib wikitcl wubwikit docroot html]
+if {[string length $local]} {
+    file copy -force $local [file join $kit_dir lib wikitcl wubwikit local.tcl]
 }
 
 foreach f $image_files {
     file copy -force $f [file join $kit_dir lib wikitcl wubwikit docroot images]
 }
+
+set ::starkit_wikitdbpath $twikidb
 
 source WikitWub.tcl
