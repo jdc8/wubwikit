@@ -48,6 +48,7 @@ cd ..
 
 # Copy/move some files
 cp local.tcl wubwikit.vfs/lib/wikitcl/wubwikit/local.tcl
+cp local.tcl wubwikit.vfs/deflocal.tcl
 cp vars.tcl wubwikit.vfs/lib/wikitcl/wubwikit/vars.tcl
 cp wikit.ini wubwikit.vfs/lib/wikitcl/wubwikit/wikit.ini
 cp wubwikit_main.tcl wubwikit.vfs/main.tcl
