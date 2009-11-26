@@ -73,6 +73,38 @@ set help(line_per_page) {
     resulting output can be used as input for the [util html|markup] commands.
 }
 
+set help(count_non_empty_text_pages_without_references_to_others) {
+    Count non-empty text pages without any references to other pages.
+}
+set sql(count_non_empty_text_pages_without_references_to_others) {
+    SELECT COUNT(*)
+    FROM pages a, pages_content b 
+    WHERE a.id = b.id 
+    AND length(b.content) > 1 
+    AND a.id NOT IN (SELECT fromid FROM refs)
+}
+
+set help(count_non_empty_text_pages_unreferenced_by_others) {
+    Count non-empty text pages not referenced by any other pages.
+}
+set sql(count_non_empty_text_pages_unreferenced_by_others) {
+    SELECT COUNT(*)
+    FROM pages a, pages_content b 
+    WHERE a.id = b.id 
+    AND length(b.content) > 1 
+    AND a.id NOT IN (SELECT toid FROM refs)
+}
+
+set help(count_image_pages_unreferenced_by_others) {
+    Count image pages not referenced by any other pages.
+}
+set sql(count_image_pages_unreferenced_by_others) {
+    SELECT COUNT(*)
+    FROM pages a, pages_binary b 
+    WHERE a.id = b.id 
+    AND a.id NOT IN (SELECT toid FROM refs)
+}
+
 set help(non_empty_text_pages_without_references_to_others) "
     Print list of non-empty text pages without any references to other pages.
 $help(line_per_page)"
@@ -201,7 +233,7 @@ Typical usage:
 
     % tclsh wubwikit<version>.vfs/main.tcl mkdb mywiki.tkd title "My Wiki"
 
-  This will create a new wiki database
+  This will create a new wiki database and use the specified title as wiki title.
 
 - Start a wiki:
 
@@ -229,7 +261,7 @@ Basic options:
 
     Create default Wiki 'local.tcl' to configure your Wiki.
 
-Options for Wub:
+Command line options:
 
   port <port>                           
 
@@ -266,6 +298,10 @@ Utilities:
     file <opath>/<page-id>.html|txt. Put each page-id as first item on a
     separate line in <file>. The output of other util commands can be used as
     input for this command.
+
+  util stats
+
+    Print some statistics about the wiki database.
 }
 
 foreach k [lsort -dictionary [array names ::sql]] {
@@ -594,11 +630,11 @@ proc get_sql_pages { } {
     $stmt close
 }
 
-proc get_sql { } {
+proc get_sql { txt } {
     global sql util
     set stmt [db prepare $sql($util)]
     $stmt foreach -as lists l {
-	puts [string map {\n \\n} $l]
+	puts "$txt[string map {\n \\n} $l]"
     }
     $stmt close
 }
@@ -615,6 +651,21 @@ if {[string length $util]} {
 	    markup { get_pages_markup }
 	    references_to_other_pages -
 	    references_from_other_pages { get_sql_pages }
+	    stats {
+		foreach util {
+		    count_pages
+		    count_text_pages
+		    count_image_pages
+		    count_non_empty_text_pages
+		    count_empty_text_pages
+		    count_pages_without_content
+		    count_non_empty_text_pages_without_references_to_others
+		    count_non_empty_text_pages_unreferenced_by_others
+		    count_image_pages_unreferenced_by_others
+		} {
+		    get_sql "$util: "
+		}
+	    }
 	    default { get_sql }
 	}
 	db close
