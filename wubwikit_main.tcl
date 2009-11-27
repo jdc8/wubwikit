@@ -608,15 +608,13 @@ proc get_pages_markup { } {
 
 proc get_ids { } {
     global sql util
-    set stmt [db prepare $sql($util)]
-    $stmt foreach -as dicts d {
+    db foreach -as dicts d $sql($util) {
 	puts [list \
 		  [dict get $d id] \
 		  [expr {([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty"}] \
 		  [dict get $d name]
 	     ]
     }
-    $stmt close
 }
 
 proc get_sql_pages { } {
@@ -632,11 +630,9 @@ proc get_sql_pages { } {
 
 proc get_sql { txt } {
     global sql util
-    set stmt [db prepare $sql($util)]
-    $stmt foreach -as lists l {
-	puts "$txt[string map {\n \\n} $l]"
+    db foreach -as lists l $sql($util) {
+ 	puts "$txt[string map {\n \\n} $l]"
     }
-    $stmt close
 }
 
 if {[string length $util]} {
