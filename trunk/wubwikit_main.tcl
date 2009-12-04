@@ -635,6 +635,82 @@ proc get_sql { txt } {
     }
 }
 
+proc residual_changes_per_day { } {
+    package require Tk
+    package require Plotchart
+
+    canvas .c  -background white -width 800 -height 600
+    pack .c -fill both
+    
+    set s [::Plotchart::createXYPlot .c {900000000.0 1210000000.0 100000000.0} {0.0 80.0 10.0}]
+    
+    $s dataconfig series1 -colour "red" -type symbol -symbol cross
+    $s xtext "Time"
+    $s ytext "Edit count"
+    $s title "Residual changes per day"
+    
+    db foreach -as dicts d {SELECT date FROM pages} {
+	set date [dict get $d date]
+	incr rd([expr $date-($date%86400)]) 1
+    }
+    
+    foreach k [array names rd] {
+	$s plot series1 $k $rd($k)
+    }
+
+    db close
+    vwait forever
+}
+
+proc last_change_for_page_graph { } {
+    package require Tk
+    package require Plotchart
+
+    canvas .c  -background white -width 800 -height 600
+    pack .c -fill both
+    
+    set s [::Plotchart::createXYPlot .c {0.0 22000.0 2000.0} {900000000.0 1210000000.0 100000000.0}]
+
+    $s dataconfig series1 -colour "red" -type symbol -symbol cross
+    $s ytext "Time"
+    $s xtext "Page number"
+    $s title "Page/last-edit graph"
+
+    db foreach -as dicts d {SELECT id, date FROM pages} {
+	$s plot series1 [dict get $d id] [dict get $d date]
+    }
+
+    db close
+    vwait forever
+}
+
+proc most_edited { sdate } {
+    set edl {}
+    db foreach -as dicts d {SELECT id, name FROM pages WHERE date > :sdate} {
+	set id [dict get $d id]
+	set ed 1
+	db foreach -as dicts c {SELECT COUNT(*) FROM changes WHERE id = :id AND date > :sdate} {
+	    incr ed [dict get $c COUNT(*)]
+	}
+	lappend edl [list $id $ed [dict get $d name]]
+    }
+    
+    set edl [lsort -decreasing -index 1 -integer $edl]
+    
+    set cnt 0
+    
+    puts "%|'''Number of page'''|'''Number of edits'''|'''Page name'''|%"
+    
+    foreach edsl $edl {
+	lassign $edsl page count name
+	puts "&|[format %5d $page]|[format %5d $count]|\[$name\]|&"
+	incr cnt
+	if { $cnt > 20 } { 
+	    break
+	}
+    }
+}
+
 if {[string length $util]} {
     set util_dir [pwd]
     if {$util eq "html"} {
@@ -647,6 +723,10 @@ if {[string length $util]} {
 	    markup { get_pages_markup }
 	    references_to_other_pages -
 	    references_from_other_pages { get_sql_pages }
+	    last_change_for_page_graph { last_change_for_page_graph }
+	    residual_changes_per_day { residual_changes_per_day }
+	    most_edited_ever { most_edited -1}
+	    most_edited_last_month { most_edited [expr {[clock seconds]-30*24*60*60}] }
 	    stats {
 		foreach util {
 		    count_pages

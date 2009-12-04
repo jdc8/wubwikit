@@ -61,8 +61,8 @@ cp sqlite3-1.0b13.tm wubwikit.vfs/lib/tdbc
 cp tdbc_sqlite3_pkgIndex.tcl wubwikit.vfs/lib/tdbc/pkgIndex.tcl
 
 # Create starkit
-sdx wrap wubwikit.kit -writable
-mv wubwikit.kit builds/wubwikit`date +%Y%m%d`.kit
+#sdx wrap wubwikit.kit -writable
+#mv wubwikit.kit builds/wubwikit`date +%Y%m%d`.kit
 
 # Create zip
 mv wubwikit.vfs wubwikit`date +%Y%m%d`.vfs
