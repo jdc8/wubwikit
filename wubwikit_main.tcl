@@ -485,6 +485,7 @@ set page ""
 set pages ""
 set opath ""
 set local ""
+set html_ext ".html"
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -495,7 +496,8 @@ foreach {key val} $iargv {
 	page -
 	pages - 
 	title -
-	opath {
+	opath -
+	html_ext {
 	    set $key $val 
 	}
 	wikidb {
@@ -571,24 +573,26 @@ proc get_pages { } {
     return $pl
 }
 
+proc write_page {o d} {
+    puts -nonewline $o [dict get $d -content]
+    close $o
+}
+
 proc get_pages_html { } {
-    global pages port opath page util_dir
+    global pages port opath page util_dir html_ext
     if {[catch {socket localhost $port} msg]} {
 	puts "Waiting for server ..."
 	after 100 get_pages_html
 	return
     }
-    package require http
-    foreach page [get_pages] {
-	set fnm [file join $util_dir $opath $page.html]
+    package require HTTP
+    foreach page  [get_pages] {
+	set fnm [file join $util_dir $opath $page$html_ext]
 	puts [list $page $fnm]
-	set tkn [http::geturl http://localhost:$port/$page]
 	set o [open $fnm w]
-	puts $o [http::data $tkn]
-	close $o
-	http::cleanup $tkn
+	set obj [HTTP new http://localhost:$port/ [list write_page $o]]
+	$obj get $page
     }
-    exit
 }
 
 proc get_pages_markup { } {
