@@ -529,7 +529,7 @@ foreach {key val} $iargv {
 	    set localfilename $val
 	}
 	mklocal {
-	}
+	} 
 	default {
 	    lappend argv $key $val
 	}
