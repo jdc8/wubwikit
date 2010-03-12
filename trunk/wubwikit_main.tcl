@@ -55,7 +55,7 @@ set sql(count_pages_without_content) {
     AND id NOT IN (SELECT id FROM pages_binary)
 }
 
-set help(line_per_page) {<<br>><<br>>Print one line per page with id and page title to standard output. The resulting output can be used as input for the `util html|markup` commands.}
+set help(line_per_page) { Print one line per page with id and page title to standard output. The resulting output can be used as input for the `util html|markup` commands.}
 
 set help(count_non_empty_text_pages_without_references_to_others) {Count non-empty text pages without any references to other pages.}
 set sql(count_non_empty_text_pages_without_references_to_others) {
@@ -173,34 +173,32 @@ set sql(ids) {
 }
 
 proc help { } {
-    puts {
+    puts {**Usage of unzippped archive:**
 
-**Usage of unzippped archive:**
-
-    % tclsh wubwikit<version>.vfs/main.tcl <options>
+ % tclsh wubwikit<version>.vfs/main.tcl <options>
 
 **Requirements:**
 
    * tclsh based on Tcl/Tk 8.6
-   * package tdbc, part of Tcl/Tk 8.6
-   * package tdbc::sqlite3, include in archive
-   * package sqlite3 version 3.6.19
+   * package [tdbc], part of Tcl/Tk 8.6
+   * package tdbc::sqlite3 from http://tdbc.tcl.tk
+   * package [sqlite]3, version 3.6.19
 
 **Typical usage:**
 
 ***Create a new wiki database:***
 
-    % tclsh wubwikit<version>.vfs/main.tcl mkdb mywiki.tkd title "My Wiki"
+ % tclsh wubwikit<version>.vfs/main.tcl mkdb mywiki.tkd title "My Wiki"
 
 This will create a new wiki database and use the specified title as wiki title.
 
 ***Start a wiki:***
 
-    % tclsh wubwikit<version>.vfs/main.tcl wikidb mywiki.tkd
+ % tclsh wubwikit<version>.vfs/main.tcl wikidb mywiki.tkd
 
 ***Start a wiki with a copy of the Tcler's wiki database:***
 
-    % tclsh wubwikit<version>.vfs/main.tcl wikidb wikit.tkd
+ % tclsh wubwikit<version>.vfs/main.tcl wikidb wikit.tkd
 
 **Command line options**
 
@@ -208,33 +206,33 @@ This will create a new wiki database and use the specified title as wiki title.
  
 +++
 help  Show this message
-wikidb <file>  Set path to Wiki database. Mandatory!
-mkdb <file> title <title>  Create empty Wiki database.
-mklocal <path>  Create default Wiki `local.tcl` to configure your Wiki.
+wikidb ''<file>''  Set path to Wiki database. Mandatory!
+mkdb ''<file>'' title ''<title>''  Create empty Wiki database.
+mklocal ''<path>''  Create default Wiki `local.tcl` to configure your Wiki.
 +++
 
 ***Configuration options:***
 
 +++
-port <port>  Set port used by [Wub]
-cmdport <port>  Set command port used by [Wub], you can [telnet] to this port to interface with the webserver.
-logfile <file>  Set name of log file
-local <file>  Wiki config file to be used for your wiki.
+port ''<port>''  Set port used by [Wub]
+cmdport ''<port>''  Set command port used by [Wub], you can [telnet] to this port to interface with the webserver.
+logfile ''<file>''  Set name of log file
+local ''<file>''  Wiki config file to be used for your wiki.
 +++
 
 ***Utilities:***
 
 +++
 util ids  Print one line per page with page-id, indication if ok or empty and page title to standard output. The resulting output can be used as input for the `util html|markup` commands.
-util html|markup page <page-id> ?opath <path>?  Print html or markup for specified page to file `<opath>/<page-id>.html|txt`.
-util html|markup pages <file> ?opath <path>?  Print html or markup for each page specified with its `<page-id>` in `<file>` to file `<opath>/<page-id>.html|txt`. Put each page-id as first item on a separate line in `<file>`. The output of other util commands can be used as input for this command.
+util html|markup page ''<page-id>'' ''?opath <path>?''  Print html or markup for specified page to file `<opath>/<page-id>.html|txt`.
+util html|markup pages ''<file>'' ''?opath <path>?''  Print html or markup for each page specified with its `<page-id>` in `<file>` to file `<opath>/<page-id>.html|txt`. Put each page-id as first item on a separate line in `<file>`. The output of other util commands can be used as input for this command.
 util stats  Print some statistics about the wiki database.}
 
 foreach k [lsort -dictionary [array names ::sql]] {
     if {$k ni {ids pages_content}} {
 	puts -nonewline "util $k"
 	if {[info exists ::util_args($k)]} {
-	    puts -nonewline " $::util_args($k)"
+	    puts -nonewline " ''$::util_args($k)''"
 	}
 	puts -nonewline "  "
 	if {[info exists ::help($k)]} {
