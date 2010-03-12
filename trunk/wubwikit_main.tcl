@@ -9,17 +9,13 @@ if {![catch {package require starkit}]} {
     }
 }
 
-set help(count_pages) {
-    Count all pages.
-}
+set help(count_pages) {Count all pages.}
 set sql(count_pages) {
     SELECT COUNT(*) 
     FROM pages
 }
 
-set help(count_text_pages) {
-    Count all image pages.
-}
+set help(count_text_pages) {Count all image pages.}
 set sql(count_text_pages) {
     SELECT COUNT(*) 
     FROM pages 
@@ -27,9 +23,7 @@ set sql(count_text_pages) {
     OR type is NULL
 }
 
-set help(count_image_pages) {
-    Count all image pages.
-}
+set help(count_image_pages) {Count all image pages.}
 set sql(count_image_pages) {
     SELECT COUNT(*) 
     FROM pages a
@@ -37,9 +31,7 @@ set sql(count_image_pages) {
     AND NOT type is NULL
 }
 
-set help(count_empty_text_pages) {
-    Count all empty text pages (content size <= 1).
-}
+set help(count_empty_text_pages) {Count all empty text pages (content size <= 1).}
 set sql(count_empty_text_pages) {
     SELECT COUNT(*) 
     FROM pages a, pages_content b 
@@ -47,9 +39,7 @@ set sql(count_empty_text_pages) {
     AND length(b.content) < 2
 }
 
-set help(count_non_empty_text_pages) {
-    Count all non empty text pages (content size > 1).
-}
+set help(count_non_empty_text_pages) {Count all non empty text pages (content size > 1).}
 set sql(count_non_empty_text_pages) {
     SELECT COUNT(*) 
     FROM pages a, pages_content b 
@@ -57,10 +47,7 @@ set sql(count_non_empty_text_pages) {
     AND length(b.content) > 1
 }
 
-set help(count_pages_without_content) {
-    Count without content. This are pages which have a title but
-    haven't got content yet, not even content with size < 1.
-}
+set help(count_pages_without_content) {Count without content. This are pages which have a title but haven't got content yet, not even content with size < 1.}
 set sql(count_pages_without_content) {
     SELECT COUNT(*)
     FROM pages
@@ -68,14 +55,9 @@ set sql(count_pages_without_content) {
     AND id NOT IN (SELECT id FROM pages_binary)
 }
 
-set help(line_per_page) {
-    Print one line per page with id and page title to standard output. The
-    resulting output can be used as input for the [util html|markup] commands.
-}
+set help(line_per_page) {<<br>><<br>>Print one line per page with id and page title to standard output. The resulting output can be used as input for the `util html|markup` commands.}
 
-set help(count_non_empty_text_pages_without_references_to_others) {
-    Count non-empty text pages without any references to other pages.
-}
+set help(count_non_empty_text_pages_without_references_to_others) {Count non-empty text pages without any references to other pages.}
 set sql(count_non_empty_text_pages_without_references_to_others) {
     SELECT COUNT(*)
     FROM pages a, pages_content b 
@@ -84,9 +66,7 @@ set sql(count_non_empty_text_pages_without_references_to_others) {
     AND a.id NOT IN (SELECT fromid FROM refs)
 }
 
-set help(count_non_empty_text_pages_unreferenced_by_others) {
-    Count non-empty text pages not referenced by any other pages.
-}
+set help(count_non_empty_text_pages_unreferenced_by_others) {Count non-empty text pages not referenced by any other pages.}
 set sql(count_non_empty_text_pages_unreferenced_by_others) {
     SELECT COUNT(*)
     FROM pages a, pages_content b 
@@ -95,9 +75,7 @@ set sql(count_non_empty_text_pages_unreferenced_by_others) {
     AND a.id NOT IN (SELECT toid FROM refs)
 }
 
-set help(count_image_pages_unreferenced_by_others) {
-    Count image pages not referenced by any other pages.
-}
+set help(count_image_pages_unreferenced_by_others) {Count image pages not referenced by any other pages.}
 set sql(count_image_pages_unreferenced_by_others) {
     SELECT COUNT(*)
     FROM pages a, pages_binary b 
@@ -105,9 +83,7 @@ set sql(count_image_pages_unreferenced_by_others) {
     AND a.id NOT IN (SELECT toid FROM refs)
 }
 
-set help(non_empty_text_pages_without_references_to_others) "
-    Print list of non-empty text pages without any references to other pages.
-$help(line_per_page)"
+set help(non_empty_text_pages_without_references_to_others) "Print list of non-empty text pages without any references to other pages.$help(line_per_page)"
 set sql(non_empty_text_pages_without_references_to_others) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
@@ -116,9 +92,7 @@ set sql(non_empty_text_pages_without_references_to_others) {
     AND a.id NOT IN (SELECT fromid FROM refs)
 }
 
-set help(non_empty_text_pages_unreferenced_by_others) "
-    Print list of non-empty text pages not referenced by any other pages.
-$help(line_per_page)"
+set help(non_empty_text_pages_unreferenced_by_others) "Print list of non-empty text pages not referenced by any other pages.$help(line_per_page)"
 set sql(non_empty_text_pages_unreferenced_by_others) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
@@ -127,9 +101,7 @@ set sql(non_empty_text_pages_unreferenced_by_others) {
     AND a.id NOT IN (SELECT toid FROM refs)
 }
 
-set help(image_pages_unreferenced_by_others) "
-    Print list of image pages not referenced by any other pages.
-$help(line_per_page)"
+set help(image_pages_unreferenced_by_others) "Print list of image pages not referenced by any other pages.$help(line_per_page)"
 set sql(image_pages_unreferenced_by_others) {
     SELECT a.id, a.name 
     FROM pages a, pages_binary b 
@@ -143,9 +115,7 @@ set sql(pages_content) {
     WHERE id = :page
 }
 
-set help(non_empty_text_pages) "
-    Print list of non-empty text pages (content size > 1).
-$help(line_per_page)"
+set help(non_empty_text_pages) "Print list of non-empty text pages (content size > 1).$help(line_per_page)"
 set sql(non_empty_text_pages) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
@@ -153,18 +123,14 @@ set sql(non_empty_text_pages) {
     AND length(b.content) > 1 
 }
 
-set help(image_pages) "
-    Print list of image text pages.
-$help(line_per_page)"
+set help(image_pages) "Print list of image text pages.$help(line_per_page)"
 set sql(image_pages) {
     SELECT a.id, a.name 
     FROM pages a, pages_binary b 
     WHERE a.id = b.id 
 }
 
-set help(empty_text_pages) "
-    Print list of empty text pages (content size <= 1).
-$help(line_per_page)"
+set help(empty_text_pages) "Print list of empty text pages (content size <= 1).$help(line_per_page)"
 set sql(empty_text_pages) {
     SELECT a.id, a.name 
     FROM pages a, pages_content b 
@@ -172,10 +138,7 @@ set sql(empty_text_pages) {
     AND length(b.content) <= 1 
 }
 
-set help(pages_without_content) "
-    Print list of pages without content. This are pages which have a title but
-    haven't got content yet, not even content with size < 1.
-$help(line_per_page)"
+set help(pages_without_content) "Print list of pages without content. This are pages which have a title but haven't got content yet, not even content with size < 1.$help(line_per_page)"
 set sql(pages_without_content) {
     SELECT id, name
     FROM pages
@@ -183,9 +146,7 @@ set sql(pages_without_content) {
     AND id NOT IN (SELECT id FROM pages_binary)
 }
 
-set help(references_to_other_pages) "
-    Print references found in specified pages to other pages.
-$help(line_per_page)"
+set help(references_to_other_pages) "Print references found in specified pages to other pages.$help(line_per_page)"
 set util_args(references_to_other_pages) "?page <page-id>? ?pages <file>?"
 set sql(references_to_other_pages) {
     SELECT a.id, b.fromid, a.name
@@ -195,9 +156,7 @@ set sql(references_to_other_pages) {
     ORDER BY a.id
 }
 
-set help(references_from_other_pages) "
-    Print references from other pages to specified pages.
-$help(line_per_page)"
+set help(references_from_other_pages) "Print references from other pages to specified pages.$help(line_per_page)"
 set util_args(references_from_other_pages) "?page <page-id>? ?pages <file>?"
 set sql(references_from_other_pages) {
     SELECT a.id, b.toid, a.name
@@ -216,101 +175,68 @@ set sql(ids) {
 proc help { } {
     puts {
 
-Usage of unzippped archive:
+**Usage of unzippped archive:**
 
     % tclsh wubwikit<version>.vfs/main.tcl <options>
 
-Requirements:
+**Requirements:**
 
-    - tclsh based on Tcl/Tk 8.6
-    - package tdbc, part of Tcl/Tk 8.6
-    - package tdbc::sqlite3, include in archive
-    - package sqlite3 version 3.6.19
+   * tclsh based on Tcl/Tk 8.6
+   * package tdbc, part of Tcl/Tk 8.6
+   * package tdbc::sqlite3, include in archive
+   * package sqlite3 version 3.6.19
 
-Typical usage:
+**Typical usage:**
 
-- Create a new wiki database:
+***Create a new wiki database:***
 
     % tclsh wubwikit<version>.vfs/main.tcl mkdb mywiki.tkd title "My Wiki"
 
-  This will create a new wiki database and use the specified title as wiki title.
+This will create a new wiki database and use the specified title as wiki title.
 
-- Start a wiki:
+***Start a wiki:***
 
     % tclsh wubwikit<version>.vfs/main.tcl wikidb mywiki.tkd
 
-- Start a wiki with a copy of the Tcler's wiki database:
+***Start a wiki with a copy of the Tcler's wiki database:***
 
     % tclsh wubwikit<version>.vfs/main.tcl wikidb wikit.tkd
 
-Basic options:
+**Command line options**
+
+***Basic options:***
  
-  help                                  
++++
+help  Show this message
+wikidb <file>  Set path to Wiki database. Mandatory!
+mkdb <file> title <title>  Create empty Wiki database.
+mklocal <path>  Create default Wiki `local.tcl` to configure your Wiki.
++++
 
-    Show this message
+***Configuration options:***
 
-  wikidb <file>                         
++++
+port <port>  Set port used by [Wub]
+cmdport <port>  Set command port used by [Wub], you can [telnet] to this port to interface with the webserver.
+logfile <file>  Set name of log file
+local <file>  Wiki config file to be used for your wiki.
++++
 
-    Set path to Wiki database. Mandatory!
+***Utilities:***
 
-  mkdb <file> title <title>
-
-    Create empty Wiki database.
-
-  mklocal <path> 
-
-    Create default Wiki 'local.tcl' to configure your Wiki.
-
-Command line options:
-
-  port <port>                           
-
-    Set port used by [Wub]
-
-  cmdport <port>                        
-
-    Set command port used by [Wub], you can `telnet` to this port to interface
-    with the webserver.
-
-  logfile <file>                        
-
-    Set name of log file
-
-  local <file>
-
-    Wiki config file to be used for your wiki.
-
-Utilities:
-
-  util ids
-
-    Print one line per page with page-id, indication if ok or empty and page
-    title to standard output. The resulting output can be used as input for the
-    [util html|markup] commands
-
-  util html|markup page <page-id> ?opath <path>?
-
-    Print html|markup for specified page to file <opath>/<page-id>.html|txt
-
-  util html|markup pages <file> ?opath <path>?
-
-    Print html|markup for each page specified with its <page-id> in <file> to
-    file <opath>/<page-id>.html|txt. Put each page-id as first item on a
-    separate line in <file>. The output of other util commands can be used as
-    input for this command.
-
-  util stats
-
-    Print some statistics about the wiki database.
-}
++++
+util ids  Print one line per page with page-id, indication if ok or empty and page title to standard output. The resulting output can be used as input for the `util html|markup` commands.
+util html|markup page <page-id> ?opath <path>?  Print html or markup for specified page to file `<opath>/<page-id>.html|txt`.
+util html|markup pages <file> ?opath <path>?  Print html or markup for each page specified with its `<page-id>` in `<file>` to file `<opath>/<page-id>.html|txt`. Put each page-id as first item on a separate line in `<file>`. The output of other util commands can be used as input for this command.
+util stats  Print some statistics about the wiki database.}
 
 foreach k [lsort -dictionary [array names ::sql]] {
     if {$k ni {ids pages_content}} {
-	puts -nonewline "  util $k"
+	puts -nonewline "util $k"
 	if {[info exists ::util_args($k)]} {
 	    puts -nonewline " $::util_args($k)"
 	}
-	puts ""
+	puts -nonewline "  "
 	if {[info exists ::help($k)]} {
 	    puts $::help($k)
 	} else {
@@ -318,6 +244,8 @@ foreach k [lsort -dictionary [array names ::sql]] {
 	}
     }
 }
+
+puts "+++"
 
 }
 
