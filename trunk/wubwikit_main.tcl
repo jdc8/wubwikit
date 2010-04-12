@@ -224,8 +224,8 @@ local ''<file>''  Wiki config file to be used for your wiki.
 
 +++
 util ids  Print one line per page with page-id, indication if ok or empty and page title to standard output. The resulting output can be used as input for the `util html|markup` commands.
-util html|markup page ''<page-id>'' ''?opath <path>?''  Print html or markup for specified page to file `<opath>/<page-id>.html|txt`.
-util html|markup pages ''<file>'' ''?opath <path>?''  Print html or markup for each page specified with its `<page-id>` in `<file>` to file `<opath>/<page-id>.html|txt`. Put each page-id as first item on a separate line in `<file>`. The output of other util commands can be used as input for this command.
+util html|markup page ''<page-id>'' ''?opath <path>?'' ''?html_ext <html-extension>?''  Print html or markup for specified page to file `<opath>/<page-id><html-extension>|.txt`.
+util html|markup pages ''<file>'' ''?opath <path>?'' ''?html_ext <html-extension>?''  Print html or markup for each page specified with its `<page-id>` in `<file>` to file `<opath>/<page-id><html-extension>|.txt`. Put each page-id as first item on a separate line in `<file>`. The output of other util commands can be used as input for this command.
 util stats  Print some statistics about the wiki database.}
 
 foreach k [lsort -dictionary [array names ::sql]] {
@@ -516,6 +516,7 @@ proc get_pages_html { } {
 	set fnm [file join $util_dir $opath $page$html_ext]
 	puts [list $page $fnm]
 	set o [open $fnm w]
+	fconfigure $o -encoding binary -translation binary
 	set obj [HTTP new http://localhost:$port/ [list write_page $o]]
 	$obj get $page
     }
