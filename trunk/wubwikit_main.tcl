@@ -123,9 +123,9 @@ set sql(non_empty_text_pages) {
     AND length(b.content) > 1 
 }
 
-set help(image_pages) "Print list of image text pages.$help(line_per_page)"
-set sql(image_pages) {
-    SELECT a.id, a.name 
+set help(binary_ids) "Print list of image text pages.$help(line_per_page)"
+set sql(binary_ids) {
+    SELECT a.id, a.name, a.type 
     FROM pages a, pages_binary b 
     WHERE a.id = b.id 
 }
@@ -293,6 +293,16 @@ proc mkdb { fnm title } {
 			    old TEXT NOT NULL,
 			    PRIMARY KEY (id, cid, did),
 			    FOREIGN KEY (id, cid) REFERENCES changes(id, cid))
+    }
+    db allrows {
+	CREATE TABLE changes_binary (id INT NOT NULL,
+				     cid INT NOT NULL,
+				     date INT NOT NULL,
+				     who TEXT NOT NULL,
+				     type TEXT,
+				     content BLOB NOT NULL,
+				     PRIMARY KEY (id, cid),
+				     FOREIGN KEY (id) REFERENCES pages(id))
     }
     db allrows {
 	CREATE TABLE refs (fromid INT NOT NULL,
@@ -505,20 +515,37 @@ proc write_page {o d} {
 }
 
 proc get_pages_html { } {
-    global pages port opath page util_dir html_ext
+    global pages port opath page util_dir html_ext sql
     if {[catch {socket localhost $port} msg]} {
 	puts "Waiting for server ..."
 	after 100 get_pages_html
 	return
     }
     package require HTTP
-    foreach page  [get_pages] {
+    set bin {}
+    db foreach -as dicts d $sql(binary_ids) {
+	set t [dict get $d type]
+	if {[string length $t] && ![string match "text/*" $t]} {
+	    lappend bin [dict get $d id]
+	}
+    }
+    foreach page [get_pages] {
 	set fnm [file join $util_dir $opath $page$html_ext]
 	puts [list $page $fnm]
 	set o [open $fnm w]
 	fconfigure $o -encoding binary -translation binary
 	set obj [HTTP new http://localhost:$port/ [list write_page $o]]
 	$obj get $page
+	if {$page in $bin} {
+	    set fnm [file join $util_dir $opath image_$page]
+	    puts [list $page $fnm]
+	    set o [open $fnm w]
+	    fconfigure $o -encoding binary -translation binary
+	    db foreach -as dicts d {SELECT content FROM pages_binary WHERE id = :page} {
+		puts $o [dict get $d content]
+	    }
+	    close $o
+	}
     }
 }
 
@@ -542,7 +569,7 @@ proc get_ids { } {
     db foreach -as dicts d $sql($util) {
 	puts [list \
 		  [dict get $d id] \
-		  [expr {([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty"}] \
+		  [expr {$util eq "ids" ? (([dict get $d date] > 0 && [string length [dict get $d content]] > 1) ? "ok" : "empty") : [dict get $d type]}] \
 		  [dict get $d name]
 	     ]
     }
@@ -644,13 +671,14 @@ proc most_edited { sdate } {
 
 if {[string length $util]} {
     set util_dir [pwd]
+    tdbc::sqlite3::connection create db $twikidb
     if {$util eq "html"} {
 	set wub 1
 	get_pages_html
     } else {
-	tdbc::sqlite3::connection create db $twikidb
 	switch -exact -- $util {
 	    ids { get_ids }
+	    binary_ids { get_ids }
 	    markup { get_pages_markup }
 	    references_to_other_pages -
 	    references_from_other_pages { get_sql_pages }
