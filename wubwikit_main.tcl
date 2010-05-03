@@ -512,10 +512,13 @@ proc get_pages { } {
 proc write_page {o d} {
     puts -nonewline $o [dict get $d -content]
     close $o
+    incr ::written
 }
 
 proc get_pages_html { } {
-    global pages port opath page util_dir html_ext sql
+    global pages port opath page util_dir html_ext sql written 
+    set written 0
+    set started 0
     if {[catch {socket localhost $port} msg]} {
 	puts "Waiting for server ..."
 	after 100 get_pages_html
@@ -535,6 +538,7 @@ proc get_pages_html { } {
 	set o [open $fnm w]
 	fconfigure $o -encoding binary -translation binary
 	set obj [HTTP new http://localhost:$port/ [list write_page $o]]
+	incr started
 	$obj get $page
 	if {$page in $bin} {
 	    set fnm [file join $util_dir $opath image_$page]
@@ -547,6 +551,11 @@ proc get_pages_html { } {
 	    close $o
 	}
     }
+    while {$written != $started} {
+	puts "$started/$written"
+	update
+    }
+    exit
 }
 
 proc get_pages_markup { } {
