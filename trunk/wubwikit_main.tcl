@@ -315,9 +315,9 @@ proc mkdb { fnm title } {
     set date [clock seconds]
     set who "init"
     
-    set ids   [list 0                        1                     2           3]
-    set names [list $title                   "ADMIN:Welcome"       "ADMIN:TOC" "Help"]
-    set pages [list "Your Wiki starts here!" "Welcome page (html)" ""          "Add help for your wiki here"]
+    set ids   [list 0                        1                     2           3            4]
+    set names [list $title                   "ADMIN:Welcome"       "ADMIN:TOC" "ADMIN:MOTD" "Help"]
+    set pages [list "Your Wiki starts here!" "Welcome page (html)" ""          ""           "Add help for your wiki here"]
     foreach id $ids name $names page $pages {
 	db allrows {INSERT INTO pages (id, name, date, who) VALUES (:id, :name, :date, :who)}
 	db allrows {INSERT INTO pages_content (id, content) VALUES (:id, :page)}
