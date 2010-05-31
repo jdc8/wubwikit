@@ -726,14 +726,14 @@ cd [file join $kit_dir lib wikitcl wubwikit]
 
 set f [open wikit.ini w]
 puts $f {# Generated ini file, port, cmdport based on command line args
-[cache]
+[Cache]
 high=100
 low=90
 maxsize=204800
 weight_age=0.02
 weight_hits=-2.0
 
-[httpd]
+[Httpd]
 }
     puts $f "logfile=$logfile"
     puts $f {max_conn=20
@@ -751,7 +751,7 @@ max=20
 -port=0
 -scgi_send=::scgi Send
 
-[wub]
+[Wub]
 }
     puts $f "cmdport=$cmdport"
     puts $f {globaldocroot=1
@@ -763,7 +763,7 @@ host=localhost
 -port=8081
 -tls=
 
-[nub]
+[Nub]
 nubs=wikit.nub
 nubdir=.
 
