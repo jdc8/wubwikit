@@ -7,7 +7,7 @@ mkdir -p wubwikit.vfs/lib
 cd wubwikit.vfs/lib
 
 # Get WUB
-svn checkout http://wub.googlecode.com/svn/trunk wub
+svn checkout http://wub.googlecode.com/svn/tags/REL-2.0.1 wub
 find . -name ".svn" | xargs rm -Rf
 
 # Get wikit
