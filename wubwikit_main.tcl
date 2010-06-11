@@ -710,7 +710,7 @@ if {[string length $util]} {
 		    get_sql "$util: "
 		}
 	    }
-	    default { get_sql }
+	    default { get_sql "" }
 	}
 	db close
 	exit
