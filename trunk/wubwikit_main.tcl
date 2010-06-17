@@ -312,6 +312,7 @@ proc mkdb { fnm title } {
 			   FOREIGN KEY (toid) references pages(id))
     }
     db allrows {CREATE INDEX refs_toid_index ON refs (toid)}
+    db allrows {CREATE INDEX idx_pages_date ON pages(date)}
     set date [clock seconds]
     set who "init"
     
