@@ -7,7 +7,7 @@ mkdir -p wubwikit.vfs/lib
 cd wubwikit.vfs/lib
 
 # Get WUB
-svn checkout http://wub.googlecode.com/svn/tags/REL-2.0.1 wub
+svn checkout http://wub.googlecode.com/svn/trunk wub
 find . -name ".svn" | xargs rm -Rf
 
 # Get wikit
@@ -33,6 +33,8 @@ cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d au
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d inifile -P tcllib/modules/inifile
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d md5 -P tcllib/modules/md5
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d doctools -P tcllib/modules/doctools
+cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d mime -P tcllib/modules/mime
+cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d base64 -P tcllib/modules/base64
 
 # Optional: remove test and documentations file to keep size of .kit low
 cd ..
