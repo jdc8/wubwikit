@@ -58,18 +58,37 @@ cp wubwikit_main.tcl wubwikit.vfs/main.tcl
 cp welcome.html wubwikit.vfs/lib/wikitcl/wubwikit/docroot/html
 cp wikitoc.jpg wubwikit.vfs/lib/wikitcl/wubwikit/docroot/images
 mkdir -p wubwikit.vfs/lib/tdbc
-
 # Get tdbc::sqlite3 from tdbc.tcl.tk manually
 cp sqlite3-1.0b13.tm wubwikit.vfs/lib/tdbc
 cp tdbc_sqlite3_pkgIndex.tcl wubwikit.vfs/lib/tdbc/pkgIndex.tcl
 
-# Create starkit
-#sdx wrap wubwikit.kit -writable
-#mv wubwikit.kit builds/wubwikit`date +%Y%m%d`.kit
 
-# Create zip
-mv wubwikit.vfs wubwikit`date +%Y%m%d`.vfs
-zip -r wubwikit`date +%Y%m%d`.vfs.zip wubwikit`date +%Y%m%d`.vfs
 mkdir -p builds
-mv wubwikit`date +%Y%m%d`.vfs.zip builds
-mv wubwikit`date +%Y%m%d`.vfs wubwikit.vfs
+
+# Create Linux starkit and zip
+cp -r teapot/linux/* wubwikit.vfs/lib
+sdx wrap wubwikit.kit -writable
+mv wubwikit.kit builds/wubwikit-linux-`date +%Y%m%d`.kit
+
+mv wubwikit.vfs wubwikit-linux-`date +%Y%m%d`.vfs
+zip -r wubwikit-linux-`date +%Y%m%d`.vfs.zip wubwikit-linux-`date +%Y%m%d`.vfs
+mv wubwikit-linux-`date +%Y%m%d`.vfs.zip builds
+
+mv wubwikit-linux-`date +%Y%m%d`.vfs wubwikit.vfs
+
+rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
+rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
+
+# Create Windows starkit and zip
+cp -r teapot/windows/* wubwikit.vfs/lib
+sdx wrap wubwikit.kit -writable
+mv wubwikit.kit builds/wubwikit-windows-`date +%Y%m%d`.kit
+
+mv wubwikit.vfs wubwikit-windows-`date +%Y%m%d`.vfs
+zip -r wubwikit-windows-`date +%Y%m%d`.vfs.zip wubwikit-windows-`date +%Y%m%d`.vfs
+mv wubwikit-windows-`date +%Y%m%d`.vfs.zip builds
+
+mv wubwikit-windows-`date +%Y%m%d`.vfs wubwikit.vfs
+
+rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
+rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
