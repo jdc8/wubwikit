@@ -32,7 +32,6 @@ cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d jp
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d autoscroll -P tklib/modules/autoscroll
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d inifile -P tcllib/modules/inifile
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d md5 -P tcllib/modules/md5
-cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d doctools -P tcllib/modules/doctools
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d mime -P tcllib/modules/mime
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d base64 -P tcllib/modules/base64
 
@@ -61,34 +60,28 @@ mkdir -p wubwikit.vfs/lib/tdbc
 # Get tdbc::sqlite3 from tdbc.tcl.tk manually
 cp sqlite3-1.0b13.tm wubwikit.vfs/lib/tdbc
 cp tdbc_sqlite3_pkgIndex.tcl wubwikit.vfs/lib/tdbc/pkgIndex.tcl
-
+cp wikit.config.templ wubwikit.vfs/lib/wikitcl/wubwikit
 
 mkdir -p builds
 
-# Create Linux starkit and zip
+# Create Linux starkit
 cp -r teapot/linux/* wubwikit.vfs/lib
 sdx wrap wubwikit.kit -writable
 mv wubwikit.kit builds/wubwikit-linux-`date +%Y%m%d`.kit
-
-mv wubwikit.vfs wubwikit-linux-`date +%Y%m%d`.vfs
-zip -r wubwikit-linux-`date +%Y%m%d`.vfs.zip wubwikit-linux-`date +%Y%m%d`.vfs
-mv wubwikit-linux-`date +%Y%m%d`.vfs.zip builds
-
 mv wubwikit-linux-`date +%Y%m%d`.vfs wubwikit.vfs
-
 rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
 rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 
-# Create Windows starkit and zip
+# Create Windows starkit
 cp -r teapot/windows/* wubwikit.vfs/lib
 sdx wrap wubwikit.kit -writable
 mv wubwikit.kit builds/wubwikit-windows-`date +%Y%m%d`.kit
-
-mv wubwikit.vfs wubwikit-windows-`date +%Y%m%d`.vfs
-zip -r wubwikit-windows-`date +%Y%m%d`.vfs.zip wubwikit-windows-`date +%Y%m%d`.vfs
-mv wubwikit-windows-`date +%Y%m%d`.vfs.zip builds
-
 mv wubwikit-windows-`date +%Y%m%d`.vfs wubwikit.vfs
-
 rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
 rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
+
+# Create zip without binaries
+mv wubwikit.vfs wubwikit`date +%Y%m%d`.vfs
+zip -r wubwikit`date +%Y%m%d`.vfs.zip wubwikit`date +%Y%m%d`.vfs
+mv wubwikit`date +%Y%m%d`.vfs.zip builds
+mv wubwikit`date +%Y%m%d`.vfs wubwikit.vfs

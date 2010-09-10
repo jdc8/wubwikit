@@ -423,6 +423,7 @@ set pages ""
 set opath ""
 set local ""
 set html_ext ".html"
+set host "localhost"
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -725,53 +726,64 @@ makeGui $port
 
 cd [file join $kit_dir lib wikitcl wubwikit]
 
-set f [open wikit.ini w]
-puts $f {# Generated ini file, port, cmdport based on command line args
-[Cache]
-high=100
-low=90
-maxsize=204800
-weight_age=0.02
-weight_hits=-2.0
+set f [open wikit.config.templ r]
+set templ [read $f]
+close $f
 
-[Httpd]
+set f [open wikit.config w]
+puts $f "
+Cache \{
+    high 100
+    low 90
+    maxsize 204800
+    weight_age 0.02
+    weight_hits -2.0
+\}
+
+Httpd \{
+    logfile $logfile
+    max_conn 100
+    retry_wait 20
+    timeout 60000
+    server_port 80
+    over 200
+    max 20
+    customize ./custom.tcl
+\}
+
+Listener \{
+    -port $port
+\}
+
+Scgi \{
+    -port 0
+    -scgi_send ::scgi Send
+\}
+
+Wub \{
+    cmdport $cmdport
+    globaldocroot 1
+    docroot ./docroot
+    stx_scripting 0
+    host $host
+\}
+
+Https \{
+    -port 8081
+\}
+
+Shell \{
+    load 1
+    port $cmdport ;# Console listening socket
+\}
+
+Human \{
+    load 0
+    path /_/
+    cookie human
 }
-    puts $f "logfile=$logfile"
-    puts $f {max_conn=20
-no_really=30
-retry_wait=20
-timeout=60000
-server_port=80
-over=200
-max=20
-
-[listener]
-}
-    puts $f "-port=$port"
-    puts $f {[scgi]
--port=0
--scgi_send=::scgi Send
-
-[Wub]
-}
-    puts $f "cmdport=$cmdport"
-    puts $f {globaldocroot=1
-docroot=./docroot
-stx_scripting=0
-host=localhost
-
-[https]
--port=8081
--tls=
-
-[Nub]
-nubs=wikit.nub
-nubdir=.
-
-[WikitWub]
-base=
-}
-
+"
+puts $f $templ
 close $f
 
 if {[string length $local]} {
