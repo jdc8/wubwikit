@@ -10,9 +10,6 @@ set ::WikitWub::readonly ""
 # Hide read-only message but still make the wiki read-only, boolean.
 set ::WikitWub::hidereadonly 0
 
-# Specify markup language used on the wiki, can be wikit, stx or creole.
-set ::WikitWub::markup_language wikit
-
 # Set text to be used when editing a page for the first time, string.
 set ::WikitWub::empty_template "This is an empty page.\n\nEnter page contents here, upload content using the button above, or click cancel to leave it empty.\n\n<<categories>>Enter Category Here\n"
 
