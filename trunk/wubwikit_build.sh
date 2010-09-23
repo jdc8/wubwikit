@@ -29,7 +29,6 @@ cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d te
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d csv -P tcllib/modules/csv
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d tar -P tcllib/modules/tar
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d jpeg -P tcllib/modules/jpeg
-cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d autoscroll -P tklib/modules/autoscroll
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d inifile -P tcllib/modules/inifile
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d md5 -P tcllib/modules/md5
 cvs -z3 -d:pserver:anonymous@tcllib.cvs.sourceforge.net:/cvsroot/tcllib co -d mime -P tcllib/modules/mime
@@ -61,6 +60,7 @@ mkdir -p wubwikit.vfs/lib/tdbc
 cp sqlite3-1.0b13.tm wubwikit.vfs/lib/tdbc
 cp tdbc_sqlite3_pkgIndex.tcl wubwikit.vfs/lib/tdbc/pkgIndex.tcl
 cp wikit.config.templ wubwikit.vfs/lib/wikitcl/wubwikit
+cp wub.config wubwikit.vfs
 
 mkdir -p builds
 
@@ -68,7 +68,6 @@ mkdir -p builds
 cp -r teapot/linux/* wubwikit.vfs/lib
 sdx wrap wubwikit.kit -writable
 mv wubwikit.kit builds/wubwikit-linux-`date +%Y%m%d`.kit
-mv wubwikit-linux-`date +%Y%m%d`.vfs wubwikit.vfs
 rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
 rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 
@@ -76,7 +75,6 @@ rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 cp -r teapot/windows/* wubwikit.vfs/lib
 sdx wrap wubwikit.kit -writable
 mv wubwikit.kit builds/wubwikit-windows-`date +%Y%m%d`.kit
-mv wubwikit-windows-`date +%Y%m%d`.vfs wubwikit.vfs
 rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
 rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 
@@ -85,3 +83,13 @@ mv wubwikit.vfs wubwikit`date +%Y%m%d`.vfs
 zip -r wubwikit`date +%Y%m%d`.vfs.zip wubwikit`date +%Y%m%d`.vfs
 mv wubwikit`date +%Y%m%d`.vfs.zip builds
 mv wubwikit`date +%Y%m%d`.vfs wubwikit.vfs
+
+# Create Wub-only starkit without binaries
+cp wub_main.tcl wubwikit.vfs/main.tcl
+rm -Rf wubwikit.vfs/lib/wikitcl
+rm -Rf wubwikit.vfs/lib/tdbc
+mv wubwikit.vfs wub.vfs
+sdx wrap wub.kit -writable
+mv wub.kit builds/wub-`date +%Y%m%d`.kit
+
+rm -Rf wub.vfs
