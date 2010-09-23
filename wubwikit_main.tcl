@@ -173,7 +173,11 @@ set sql(ids) {
 }
 
 proc help { } {
-    puts {**Usage of unzippped archive:**
+    puts {**Usage of [starkit]:**
+
+ % tclkit wubwikit<version>.kit <options>
+
+**Usage of unzippped archive or unwrapped [starkit]:**
 
  % tclsh wubwikit<version>.vfs/main.tcl <options>
 
@@ -400,8 +404,6 @@ set argv {}
 
 set kit_dir [file dirname [file normalize [info script]]]
 
-set wub 0
-set wubdir [file join $kit_dir lib wub]
 set globalroot 0
 set home [pwd]
 set port 8080
@@ -452,7 +454,7 @@ foreach {key val} $iargv {
 	    lappend image_files [file normalize $val]
 	}
 	local {
-	    set local [file normalize $val]
+	    set $key [file normalize $val]
 	}
 	help {
 	    help
@@ -684,7 +686,6 @@ if {[string length $util]} {
     set util_dir [pwd]
     tdbc::sqlite3::connection create db $twikidb
     if {$util eq "html"} {
-	set wub 1
 	get_pages_html
     } else {
 	switch -exact -- $util {
