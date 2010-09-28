@@ -84,12 +84,11 @@ zip -r wubwikit`date +%Y%m%d`.vfs.zip wubwikit`date +%Y%m%d`.vfs
 mv wubwikit`date +%Y%m%d`.vfs.zip builds
 mv wubwikit`date +%Y%m%d`.vfs wubwikit.vfs
 
-# Create Wub-only starkit without binaries
-cp wub_main.tcl wubwikit.vfs/main.tcl
+# Create Wub-only zipkit without binaries cp wub_main.tcl wubwikit.vfs/main.tcl
 rm -Rf wubwikit.vfs/lib/wikitcl
 rm -Rf wubwikit.vfs/lib/tdbc
 mv wubwikit.vfs wub.vfs
-sdx wrap wub.kit -writable
+tclsh8.6 mkzip.tcl wub.kit -zipkit -directory wub.vfs
 mv wub.kit builds/wub-`date +%Y%m%d`.kit
 
 rm -Rf wub.vfs
