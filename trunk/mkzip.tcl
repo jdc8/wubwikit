@@ -81,6 +81,9 @@ proc zip::walk {base {excludes ""} {match *} {path {}}} {
 proc zip::mkzipfile {zipchan base path {comment ""}} {
     set fullpath [file join $base $path]
     set mtime [timet_to_dos [file mtime $fullpath]]
+    if {[file isdirectory $fullpath]} {
+	append path /
+    }
     set utfpath [encoding convertto utf-8 $path]
     set utfcomment [encoding convertto utf-8 $comment]
     set flags [expr {(1<<11)}] ;# utf-8 comment and path
