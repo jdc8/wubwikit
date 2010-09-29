@@ -68,6 +68,8 @@ mkdir -p builds
 cp -r teapot/linux/* wubwikit.vfs/lib
 sdx wrap wubwikit.kit -writable
 mv wubwikit.kit builds/wubwikit-linux-`date +%Y%m%d`.kit
+tclsh8.6 mkzip.tcl wubwikit.zipkit -zipkit -directory wubwikit.vfs
+mv wubwikit.zipkit builds/wubwikit-linux-`date +%Y%m%d`.zipkit
 rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
 rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 
@@ -75,6 +77,8 @@ rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 cp -r teapot/windows/* wubwikit.vfs/lib
 sdx wrap wubwikit.kit -writable
 mv wubwikit.kit builds/wubwikit-windows-`date +%Y%m%d`.kit
+tclsh8.6 mkzip.tcl wubwikit.zipkit -zipkit -directory wubwikit.vfs
+mv wubwikit.zipkit builds/wubwikit-windows-`date +%Y%m%d`.zipkit
 rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
 rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 
@@ -84,7 +88,8 @@ zip -r wubwikit`date +%Y%m%d`.vfs.zip wubwikit`date +%Y%m%d`.vfs
 mv wubwikit`date +%Y%m%d`.vfs.zip builds
 mv wubwikit`date +%Y%m%d`.vfs wubwikit.vfs
 
-# Create Wub-only zipkit without binaries cp wub_main.tcl wubwikit.vfs/main.tcl
+# Create Wub-only zipkit without binaries
+cp wub_main.tcl wubwikit.vfs/main.tcl
 rm -Rf wubwikit.vfs/lib/wikitcl
 rm -Rf wubwikit.vfs/lib/tdbc
 mv wubwikit.vfs wub.vfs
