@@ -408,14 +408,15 @@ set globalroot 0
 set home [pwd]
 set port 8080
 set cmdport 8082
-if {[info exists ::env(TEMP)]} {
-    set logfile [file join $::env(TEMP) wikit.log]
-} elseif {[info exists ::env(TMP)]} {
-    set logfile [file join $::env(TMP) wikit.log]
+if {[info exists env(TMP)]} {
+    set tmpdir $env(TMP)
+} elseif {[info exists env(TEMP)]} {
+    set tmpdir $env(TEMP)
 } else {
-    set logfile /tmp/wikit.log
+    set tmpdir [file dirname $kit_dir]
 }
-set image_files {}
+
+set logfile [file join $tmpdir wikit.log]
 set mkdb 0
 set mklocal 0
 set dbfilename ""
@@ -449,9 +450,6 @@ foreach {key val} $iargv {
 	    set val [file normalize $val]
 	    lappend argv $key $val
 	    set logfile $val
-	}
-	image {
-	    lappend image_files [file normalize $val]
 	}
 	local {
 	    set $key [file normalize $val]
@@ -731,7 +729,8 @@ set f [open wikit.config.templ r]
 set templ [read $f]
 close $f
 
-set f [open wikit.config w]
+set ::starkit::config_file [file join $tmpdir wikit.config]
+set f [open $::starkit::config_file w]
 puts $f "
 Cache \{
     high 100
@@ -767,6 +766,7 @@ Wub \{
     docroot ./docroot
     stx_scripting 0
     host $host
+    logfile $logfile.wub
 \}
 
 Https \{
@@ -788,11 +788,7 @@ puts $f $templ
 close $f
 
 if {[string length $local]} {
-    file copy -force $local [file join $kit_dir lib wikitcl wubwikit local.tcl]
-}
-
-foreach f $image_files {
-    file copy -force $f [file join $kit_dir lib wikitcl wubwikit docroot images]
+    set ::starkit::local_file $local
 }
 
 set ::starkit_wikitdbpath $twikidb
