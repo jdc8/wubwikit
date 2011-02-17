@@ -30,7 +30,9 @@ set ::WikitWub::need_recaptcha 0
 set ::WikitWub::recaptcha_public ""
 set ::WikitWub::recaptcha_private ""
 
-
 # Google search and set google search API key to enable searching using google. Requires google bot to have access to you site.
 set ::WikitWub::gsearch 0
 set ::google_jsapi_key ""
+
+# SQL queries on the DB from _/query
+set ::WikitWub::allow_sql_queries 1
