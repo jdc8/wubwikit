@@ -60,7 +60,6 @@ mkdir -p wubwikit.vfs/lib/tdbc
 cp sqlite3-1.0b13.tm wubwikit.vfs/lib/tdbc
 cp tdbc_sqlite3_pkgIndex.tcl wubwikit.vfs/lib/tdbc/pkgIndex.tcl
 cp wikit.config.templ wubwikit.vfs/lib/wikitcl/wubwikit
-cp wub.config wubwikit.vfs
 
 mkdir -p builds
 
@@ -68,8 +67,11 @@ mkdir -p builds
 cp -r teapot/linux/* wubwikit.vfs/lib
 sdx wrap wubwikit.kit -writable
 mv wubwikit.kit builds/wubwikit-linux-`date +%Y%m%d`.kit
-tclsh8.6 mkzip.tcl wubwikit.zipkit -zipkit -directory wubwikit.vfs
-mv wubwikit.zipkit builds/wubwikit-linux-`date +%Y%m%d`.zipkit
+
+# Create Linux zipkit
+#tclsh8.6 mkzip.tcl wubwikit.zipkit -zipkit -directory wubwikit.vfs
+#mv wubwikit.zipkit builds/wubwikit-linux-`date +%Y%m%d`.zipkit
+
 rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
 rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 
@@ -77,8 +79,11 @@ rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 cp -r teapot/windows/* wubwikit.vfs/lib
 sdx wrap wubwikit.kit -writable
 mv wubwikit.kit builds/wubwikit-windows-`date +%Y%m%d`.kit
-tclsh8.6 mkzip.tcl wubwikit.zipkit -zipkit -directory wubwikit.vfs
-mv wubwikit.zipkit builds/wubwikit-windows-`date +%Y%m%d`.zipkit
+
+# Create Windows zipkit
+#tclsh8.6 mkzip.tcl wubwikit.zipkit -zipkit -directory wubwikit.vfs
+#mv wubwikit.zipkit builds/wubwikit-windows-`date +%Y%m%d`.zipkit
+
 rm -Rf wubwikit.vfs/lib/sqlite33.6.23  
 rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
 
@@ -87,15 +92,3 @@ mv wubwikit.vfs wubwikit`date +%Y%m%d`.vfs
 zip -r wubwikit`date +%Y%m%d`.vfs.zip wubwikit`date +%Y%m%d`.vfs
 mv wubwikit`date +%Y%m%d`.vfs.zip builds
 mv wubwikit`date +%Y%m%d`.vfs wubwikit.vfs
-
-# Create Wub-only zipkit without binaries
-cp wub_main.tcl wubwikit.vfs/main.tcl
-rm -Rf wubwikit.vfs/lib/wikitcl
-rm -Rf wubwikit.vfs/lib/tdbc
-mv wubwikit.vfs wub.vfs
-sdx wrap wub.kit -writable
-mv wub.kit builds/wub-`date +%Y%m%d`.kit
-tclsh8.6 mkzip.tcl wub.zipkit -zipkit -directory wub.vfs
-mv wub.zipkit builds/wub-`date +%Y%m%d`.zipkit
-
-rm -Rf wub.vfs
