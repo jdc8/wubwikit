@@ -213,15 +213,17 @@ help  Show this message
 wikidb ''<file>''  Set path to Wiki database. Mandatory!
 mkdb ''<file>'' title ''<title>''  Create empty Wiki database.
 mklocal ''<path>''  Create default Wiki `local.tcl` to configure your Wiki.
+mkconfig ''<path>''  Create default Wiki config file to configure the Wub webserver.
 +++
 
 ***Configuration options:***
 
 +++
-port ''<port>''  Set port used by [Wub]
-cmdport ''<port>''  Set command port used by [Wub], you can [telnet] to this port to interface with the webserver.
+port ''<port>''  Set port used by [Wub], default is 8080.
+cmdport ''<port>''  Set command port used by [Wub], you can [telnet] to this port to interface with the webserver, default is 8082.
 logfile ''<file>''  Set name of log file
-local ''<file>''  Wiki config file to be used for your wiki.
+local ''<file>''  Wiki config file to be used for your wiki. The output of the `mklocal` command is used as default.
+config ''<file>''  Wub config file to be used for your wiki. The output of the `mkconfig` command is used as default.
 +++
 
 ***Utilities:***
@@ -337,6 +339,72 @@ proc mklocal {fnm} {
     file copy $::kit_dir/deflocal.tcl $fnm
 }
 
+proc mkconfig {fnm run} {
+    if {!$run && [file exists $fnm]} {
+	error "Config file '$fnm' already exists"
+    }
+    global logfile port cmdport host
+    set f [open wikit.config.templ r]
+    set templ [read $f]
+    close $f
+    set f [open $fnm w]
+    puts $f "
+Cache \{
+    high 100
+    low 90
+    maxsize 204800
+    weight_age 0.02
+    weight_hits -2.0
+\}
+
+Httpd \{
+    logfile $logfile
+    max_conn 100
+    retry_wait 20
+    timeout 60000
+    server_port 80
+    over 200
+    max 20
+    customize ./custom.tcl
+\}
+
+Listener \{
+    -port $port
+\}
+
+Scgi \{
+    -port 0
+    -scgi_send ::scgi Send
+\}
+
+Wub \{
+    cmdport $cmdport
+    globaldocroot 1
+    docroot ./docroot
+    stx_scripting 0
+    host $host
+    logfile $logfile.wub
+\}
+
+Https \{
+    -port 8081
+\}
+
+Shell \{
+    load 1
+    port $cmdport ;# Console listening socket
+\}
+
+Human \{
+    load 0
+    path /_/
+    cookie human
+\}
+"
+    puts $f $templ
+    close $f
+}
+
 # from "Invoking browsers" in the wiki
 proc launchBrowser url {
     global tcl_platform
@@ -419,12 +487,14 @@ if {[info exists env(TMP)]} {
 set logfile [file join $tmpdir wikit.log]
 set mkdb 0
 set mklocal 0
+set mkconfig 0
 set dbfilename ""
 set util ""
 set page ""
 set pages ""
 set opath ""
 set local ""
+set config ""
 set html_ext ".html"
 set host "localhost"
 
@@ -454,6 +524,9 @@ foreach {key val} $iargv {
 	local {
 	    set $key [file normalize $val]
 	}
+	config {
+	    set $key [file normalize $val]
+	}
 	help {
 	    help
 	    exit
@@ -464,10 +537,12 @@ foreach {key val} $iargv {
 	}
 	mklocal {
 	    set mklocal 1
-	    set localfilename $val
+	    set localfilename [file normalize $val]
 	}
-	mklocal {
-	} 
+	mkconfig {
+	    set mkconfig 1
+	    set configfilename [file normalize $val]
+	}
 	default {
 	    lappend argv $key $val
 	}
@@ -486,6 +561,12 @@ if {$mkdb} {
 
 if {$mklocal} {
     mklocal $localfilename
+    exit
+}
+
+if {$mkconfig} {
+    cd [file join $kit_dir lib wikitcl wubwikit]
+    mkconfig $configfilename 0
     exit
 }
 
@@ -725,67 +806,12 @@ makeGui $port
 
 cd [file join $kit_dir lib wikitcl wubwikit]
 
-set f [open wikit.config.templ r]
-set templ [read $f]
-close $f
-
-set ::starkit::config_file [file join $tmpdir wikit.config]
-set f [open $::starkit::config_file w]
-puts $f "
-Cache \{
-    high 100
-    low 90
-    maxsize 204800
-    weight_age 0.02
-    weight_hits -2.0
-\}
-
-Httpd \{
-    logfile $logfile
-    max_conn 100
-    retry_wait 20
-    timeout 60000
-    server_port 80
-    over 200
-    max 20
-    customize ./custom.tcl
-\}
-
-Listener \{
-    -port $port
-\}
-
-Scgi \{
-    -port 0
-    -scgi_send ::scgi Send
-\}
-
-Wub \{
-    cmdport $cmdport
-    globaldocroot 1
-    docroot ./docroot
-    stx_scripting 0
-    host $host
-    logfile $logfile.wub
-\}
-
-Https \{
-    -port 8081
-\}
-
-Shell \{
-    load 1
-    port $cmdport ;# Console listening socket
-\}
-
-Human \{
-    load 0
-    path /_/
-    cookie human
+if {[string length $config]} {
+    set ::starkit::config_file $config
+} else {
+    set ::starkit::config_file [file join $tmpdir wikit.config]
+    mkconfig $::starkit::config_file 1
 }
-"
-puts $f $templ
-close $f
 
 if {[string length $local]} {
     set ::starkit::local_file $local
