@@ -35,4 +35,4 @@ set ::WikitWub::gsearch 0
 set ::google_jsapi_key ""
 
 # SQL queries on the DB from _/query
-set ::WikitWub::allow_sql_queries 1
+set ::WikitWub::allow_sql_queries 0
