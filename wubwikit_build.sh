@@ -93,6 +93,8 @@ cp wub_main.tcl wubwikit.vfs/main.tcl
 rm -Rf wubwikit.vfs/lib/wikitcl
 rm -Rf wubwikit.vfs/lib/tdbc
 mv wubwikit.vfs wub.vfs
+sdx wrap wub.kit -writable
+mv wub.kit builds/wub-`date +%Y%m%d`.kit
 tclsh8.6 mkzip.tcl wub.zipkit -zipkit -directory wub.vfs
 mv wub.zipkit builds/wub-`date +%Y%m%d`.zipkit
 
