@@ -173,36 +173,32 @@ set sql(ids) {
 }
 
 proc help { } {
-    puts {**Usage of [starkit]:**
+    puts {**Usage of unzippped archive:**
 
- % tclkit wubwikit<version>.kit <options>
-
-**Usage of unzippped archive or unwrapped [starkit]:**
-
- % tclsh wubwikit<version>.vfs/main.tcl <options>
+ % tclsh wubwikit<version>/main.tcl <options>
 
 **Requirements:**
 
    * tclsh based on Tcl/Tk 8.6
    * package [tdbc], part of Tcl/Tk 8.6
-   * package tdbc::sqlite3 from http://tdbc.tcl.tk
-   * package [sqlite]3, version 3.6.19
+   * package tdbc::sqlite3 from http://tdbc.tcl.tk, version >= 1.0b16
+   * package [sqlite]3, version >= 3.7.3
 
 **Typical usage:**
 
 ***Create a new wiki database:***
 
- % tclsh wubwikit<version>.vfs/main.tcl mkdb mywiki.tkd title "My Wiki"
+ % tclsh wubwikit<version>/main.tcl mkdb mywiki.tkd title "My Wiki"
 
 This will create a new wiki database and use the specified title as wiki title.
 
 ***Start a wiki:***
 
- % tclsh wubwikit<version>.vfs/main.tcl wikidb mywiki.tkd
+ % tclsh wubwikit<version>/main.tcl wikidb mywiki.tkd
 
 ***Start a wiki with a copy of the Tcler's wiki database:***
 
- % tclsh wubwikit<version>.vfs/main.tcl wikidb wikit.tkd
+ % tclsh wubwikit<version>/main.tcl wikidb wikit.tkd
 
 **Command line options**
 
