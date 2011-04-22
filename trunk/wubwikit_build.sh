@@ -7,7 +7,7 @@ mkdir -p wubwikit.vfs/lib
 cd wubwikit.vfs/lib
 
 # Get WUB
-svn checkout -r r3604 http://wub.googlecode.com/svn/trunk wub
+svn checkout http://wub.googlecode.com/svn/trunk wub
 find . -name ".svn" | xargs rm -Rf
 
 # Get wikit
@@ -56,38 +56,13 @@ cp wubwikit_main.tcl wubwikit.vfs/main.tcl
 cp welcome.html wubwikit.vfs/lib/wikitcl/wubwikit/docroot/html
 cp wikitoc.jpg wubwikit.vfs/lib/wikitcl/wubwikit/docroot/images
 mkdir -p wubwikit.vfs/lib/tdbc
-# Get tdbc::sqlite3 from tdbc.tcl.tk manually
-#cp sqlite3-1.0b16.tm wubwikit.vfs/lib/tdbc
-#cp tdbc_sqlite3_pkgIndex.tcl wubwikit.vfs/lib/tdbc/pkgIndex.tcl
+cp sqlite3-1.0b16.tm wubwikit.vfs/lib/tdbc
+cp pkgIndex.tcl wubwikit.vfs/lib/tdbc/pkgIndex.tcl
 cp wikit.config.templ wubwikit.vfs/lib/wikitcl/wubwikit
 
 mkdir -p builds
 
-# Create Linux starkit
-#cp -r teapot/linux/* wubwikit.vfs/lib
-#sdx wrap wubwikit.kit -writable
-#mv wubwikit.kit builds/wubwikit-linux-`date +%Y%m%d`.kit
-
-# Create Linux zipkit
-#tclsh8.6 mkzip.tcl wubwikit.zipkit -zipkit -directory wubwikit.vfs
-#mv wubwikit.zipkit builds/wubwikit-linux-`date +%Y%m%d`.zipkit
-
-#rm -Rf wubwikit.vfs/lib/sqlite33.7.2
-#rm -Rf wubwikit.vfs/lib/tdbc1.0b16
-
-# Create Windows starkit
-#cp -r teapot/windows/* wubwikit.vfs/lib
-#sdx wrap wubwikit.kit -writable
-#mv wubwikit.kit builds/wubwikit-windows-`date +%Y%m%d`.kit
-
-# Create Windows zipkit
-#tclsh8.6 mkzip.tcl wubwikit.zipkit -zipkit -directory wubwikit.vfs
-#mv wubwikit.zipkit builds/wubwikit-windows-`date +%Y%m%d`.zipkit
-
-#rm -Rf wubwikit.vfs/lib/sqlite33.6.23
-#rm -Rf wubwikit.vfs/lib/tdbc1.0b14.1
-
-# Create zip without binaries
+# Create zip
 mv wubwikit.vfs wubwikit`date +%Y%m%d`
 zip -r wubwikit`date +%Y%m%d`.zip wubwikit`date +%Y%m%d`
 mv wubwikit`date +%Y%m%d`.zip builds

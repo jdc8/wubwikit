@@ -210,6 +210,7 @@ wikidb ''<file>''  Set path to Wiki database. Mandatory!
 mkdb ''<file>'' title ''<title>''  Create empty Wiki database.
 mklocal ''<path>''  Create default Wiki `local.tcl` to configure your Wiki.
 mkconfig ''<path>''  Create default Wiki config file to configure the Wub webserver.
+mkfts ''<boolean>'' Add full-text-search table to specified wiki-database.
 +++
 
 ***Configuration options:***
@@ -245,8 +246,35 @@ foreach k [lsort -dictionary [array names ::sql]] {
     }
 }
 
+util sql sqlstmt ''<sql statement>''  Execute the SQL statement and print the results
 puts "+++"
 
+}
+
+proc exec_sql_stmt {db stmt} {
+    set qs [$db prepare $stmt]
+    set rs [$qs execute]
+    while {1} {
+	while {[$rs nextdict d]} {
+	    puts $d
+	}
+	if {![$rs nextresults]} {
+	    break
+	}
+    }
+    $rs close
+    $qs close
+}
+
+proc mkfts { fnm } {
+    tdbc::sqlite3::connection create db $fnm
+    catch {exec_sql_stmt db {DROP TABLE pages_content_fts}} msg
+    puts $msg
+    catch {exec_sql_stmt db {CREATE VIRTUAL TABLE pages_content_fts USING fts4(id,name,content)}} msg
+    puts $msg
+    catch {exec_sql_stmt db {INSERT INTO pages_content_fts SELECT a.id, a.name, b.content FROM pages a, pages_content b WHERE a.id = b.id}} msg
+    puts $msg
+    db close
 }
 
 proc mkdb { fnm title } { 
@@ -484,6 +512,7 @@ set logfile [file join $tmpdir wikit.log]
 set mkdb 0
 set mklocal 0
 set mkconfig 0
+set mkfts 0
 set dbfilename ""
 set util ""
 set page ""
@@ -493,6 +522,7 @@ set local ""
 set config ""
 set html_ext ".html"
 set host "localhost"
+set sqlstmt ""
 
 foreach {key val} $iargv {
     switch -exact -- $key {
@@ -504,6 +534,7 @@ foreach {key val} $iargv {
 	pages - 
 	title -
 	opath -
+	sqlstmt -
 	html_ext {
 	    set $key $val 
 	}
@@ -539,6 +570,9 @@ foreach {key val} $iargv {
 	    set mkconfig 1
 	    set configfilename [file normalize $val]
 	}
+	mkfts {
+	    set mkfts $val
+	}
 	default {
 	    lappend argv $key $val
 	}
@@ -548,10 +582,14 @@ foreach {key val} $iargv {
 lappend auto_path [file join $kit_dir lib] [file join $kit_dir lib wikitcl] [file join $kit_dir lib wub]
 
 package require tdbc
+package require sqlite3 3.7.5
 package require tdbc::sqlite3
 
 if {$mkdb} {
     mkdb $dbfilename $title
+    if {$mkfts} {
+	mkfts $dbfilename
+    }
     exit
 }
 
@@ -563,6 +601,11 @@ if {$mklocal} {
 if {$mkconfig} {
     cd [file join $kit_dir lib wikitcl wubwikit]
     mkconfig $configfilename 0
+    exit
+}
+
+if {$mkfts} {
+    mkfts $twikidb
     exit
 }
 
@@ -764,6 +807,7 @@ if {[string length $util]} {
 	get_pages_html
     } else {
 	switch -exact -- $util {
+	    sql { exec_sql_stmt db $sqlstmt }
 	    ids { get_ids }
 	    binary_ids { get_ids }
 	    markup { get_pages_markup }
