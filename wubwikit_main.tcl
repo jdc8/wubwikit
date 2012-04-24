@@ -246,7 +246,7 @@ foreach k [lsort -dictionary [array names ::sql]] {
     }
 }
 
-util sql sqlstmt ''<sql statement>''  Execute the SQL statement and print the results
+puts {util sql sqlstmt ''<sql statement>''  Execute the SQL statement and print the results}
 puts "+++"
 
 }

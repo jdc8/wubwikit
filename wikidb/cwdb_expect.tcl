@@ -7,7 +7,7 @@ set timeout -1
 spawn ssh $wiki_user@wiki.tcl.tk
 
 expect {
-    -ex "$wiki_user@wiki:~\$" {
+    -ex "\$" {
     } -re . {
 	exp_continue
     }
@@ -20,7 +20,7 @@ expect {
 exp_send "cp /usr/local/wikit/data/wikit.tkd wikit.tkd\r"
 
 expect {
-    -ex "$wiki_user@wiki:~$" {
+    -ex "\$" {
     } -re . {
 	exp_continue
     }
@@ -33,7 +33,7 @@ expect {
 exp_send "gzip -f wikit.tkd\r"
 
 expect {
-    -ex "$wiki_user@wiki:~$" {
+    -ex "\$" {
     } -re . {
 	exp_continue
     }
